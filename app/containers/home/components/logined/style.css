@@ -1,0 +1,23 @@
+.container{
+    
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    padding:40px 20px;
+    background-color: #fff;
+    border-radius:6px;
+}
+.container>div{
+    width: 50%;
+    background: #eee;
+
+}
+
+.container>img{
+    width: 27%;
+    
+}
+
+.container>p{
+    padding:10px 0;
+}
