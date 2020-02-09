@@ -1,5 +1,6 @@
+import comments from './comments';
+import {combineReducers} from 'redux'
 const initialState = {
-    category: [],
     articleList: [],
     articleDetail: {},
     pageNum: 1,
@@ -28,7 +29,7 @@ export const actions = {
     }
 };
 
-export function reducer(state = initialState, action) {
+ function reducer(state = initialState, action) {
     switch (action.type) {
         case actionTypes.RESPONSE_ARTICLE_LIST:
             return {
@@ -43,3 +44,8 @@ export function reducer(state = initialState, action) {
             return state;
     }
 }
+
+export default combineReducers({
+    article:reducer,
+    comments
+})

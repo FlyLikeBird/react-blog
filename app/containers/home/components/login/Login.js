@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import PureRenderMixin from 'react-addons-pure-render-mixin'
-import style from './style.css'
+import style from './login.style.css'
 import {Tabs} from 'antd';
 import LoginForm from './LoginForm'
 import RegisterForm from "./RegisterForm";
@@ -11,7 +11,7 @@ export default class Login extends Component {
         super(props);
         this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this)
     }
-
+    
 
     render() {
         const {login,register} = this.props;

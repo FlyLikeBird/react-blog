@@ -6,7 +6,18 @@ import rootSaga from './sagas'
 const win = window;
 const sagaMiddleware = createSagaMiddleware();
 const middlewares = [];
-
+/*
+var middleWare1 = ()=>(next)=>(action)=>{
+    console.log('middleware1 ');
+    next(action);
+    console.log('middleware1 === close');
+};
+var middleWare2 = ()=>(next)=>(action)=>{
+    console.log('middleware2 ');
+    next(action);
+    console.log('middleware2 === close');
+}
+*/
 let storeEnhancers ;
 if(process.env.NODE_ENV==='production'){
     storeEnhancers = compose(
@@ -22,6 +33,7 @@ if(process.env.NODE_ENV==='production'){
 export default function configureStore(initialState={}) {
     const store = createStore(rootReducer, initialState,storeEnhancers);
     sagaMiddleware.run(rootSaga);
+    
     if (module.hot && process.env.NODE_ENV!=='production') {
         // Enable Webpack hot module replacement for reducers
         module.hot.accept( './reducers',() => {
@@ -29,5 +41,6 @@ export default function configureStore(initialState={}) {
             store.replaceReducer(nextRootReducer);
         });
     }
+    
     return store;
 }

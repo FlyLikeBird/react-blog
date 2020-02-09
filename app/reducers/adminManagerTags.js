@@ -1,4 +1,4 @@
-const initialState = ['首页'];
+const initialState = [{tag:'首页',content:0}];
 
 export const actionTypes = {
     GET_ALL_TAGS:"GET_ALL_TAGS",
@@ -30,7 +30,13 @@ export const actions = {
 export function reducer(state=initialState,action) {
     switch (action.type){
         case actionTypes.SET_TAGS:
-            return['首页',...action.data];
+            var tags = action.data;
+            var total = 0;
+            tags.map(item=>{
+                total+=item.content;
+            });
+            state[0].content = total;
+            return state.concat(tags);
         default:
             return  state;
     }

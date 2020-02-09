@@ -4,7 +4,7 @@ import {
     Redirect
 } from 'react-router-dom'
 import style from './style.css'
-import ArticleList from "./components/articelList/ArticleList";
+import ArticleList from "./components/article-list/ArticleList";
 import {Pagination} from 'antd';
 import {connect} from 'react-redux'
 import {bindActionCreators} from 'redux'
@@ -20,7 +20,6 @@ class Home extends Component {
     render() {
         const {tags} = this.props;
         localStorage.setItem('userInfo', JSON.stringify(this.props.userInfo));
-        //console.log("hello world");
         return (
             tags.length > 1 && this.props.match.params.tag && (tags.indexOf(this.props.match.params.tag) === -1 || this.props.location.pathname.lastIndexOf('\/') > 0)
                 ?
@@ -34,9 +33,9 @@ class Home extends Component {
                     />
                     <div className={style.paginationContainer}>
                         <Pagination
-                            defaultPageSize={5}
+                            defaultPageSize={10}
                             onChange={(pageNum) => {
-                                this.props.get_article_list(this.props.match.params.tag || '', pageNum);
+                                this.props.get_article_list(this.props.match.params.id || '', pageNum);
                             }}
                             current={this.props.pageNum}
                             total={this.props.total}/>
@@ -46,7 +45,7 @@ class Home extends Component {
     }
 
     componentDidMount() {
-        this.props.get_article_list(this.props.match.params.tag || '')
+        this.props.get_article_list(this.props.match.params.tag || '');
     }
 }
 
@@ -64,12 +63,11 @@ Home.propsTypes = {
 };
 
 function mapStateToProps(state) {
-    //console.log(state);
     return {
         tags: state.admin.tags,
-        pageNum: state.front.pageNum,
-        total: state.front.total,
-        articleList: state.front.articleList
+        pageNum: state.front.article.pageNum,
+        total: state.front.article.total,
+        articleList: state.front.article.articleList
     }
 }
 

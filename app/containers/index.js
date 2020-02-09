@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react'
+import React, {Component } from 'react'
+import PropTypes from 'prop-types'
 import PureRenderMixiin from 'react-addons-pure-render-mixin'
 import {
     BrowserRouter as Router,
@@ -19,6 +20,7 @@ import {bindActionCreators} from 'redux'
 import {actions} from '../reducers'
 import Admin from "./admin/Admin";
 import Front from './front/Front'
+import Usercenter from './usercenter/Usercenter';
 import animationStyle from '../lib/animate.css'
 
 const {clear_msg, user_auth} = actions;
@@ -50,9 +52,9 @@ class AppIndex extends Component {
                     <Switch>
                         <Route path='/404' component={NotFound}/>
                         <Route path='/admin' component={Admin}/>
-                        <Route component={Front}/>
+                        <Route path="/" component={Front}/>
+                        <Route path="/usercenter/:id" component={Usercenter} />
                     </Switch>
-                    {isFetching && <Loading/>}
                     {this.props.notification && this.props.notification.content ?
                         (this.props.notification.type === 1 ?
                             this.openNotification('success', this.props.notification.content) :
@@ -62,26 +64,20 @@ class AppIndex extends Component {
             </Router>
         )
     }
-
-    componentDidMount() {
-        this.props.user_auth();
-    }
-
 }
+
 
 
 function mapStateToProps(state) {
     return {
         notification: state.globalState.msg,
-        isFetching: state.globalState.isFetching,
-        userInfo: state.globalState.userInfo,
+        isFetching: state.globalState.isFetching
     }
 }
 
 function mapDispatchToProps(dispatch) {
     return {
-        clear_msg: bindActionCreators(clear_msg, dispatch),
-        user_auth: bindActionCreators(user_auth, dispatch)
+        clear_msg: bindActionCreators(clear_msg, dispatch)
     }
 }
 

@@ -1,0 +1,11 @@
+.container {
+    background-color:#fff;
+    margin:10px 0;
+    display:flex;
+    justify-content: center;
+    padding:10px;
+}
+
+.container button {
+    margin:0 4px;
+}

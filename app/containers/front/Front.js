@@ -1,9 +1,11 @@
-import React,{Component,PropTypes} from 'react'
+import React,{Component } from 'react'
+import PropTypes from 'prop-types'
 import {connect} from 'react-redux'
 import {Detail} from '../detail'
 import {Home} from '../home'
-import style from './style.css'
+import style from './front.style.css'
 import {
+    BrowserRouter as Router,
     Switch,
     Route
 } from 'react-router-dom'
@@ -26,8 +28,7 @@ class Front extends Component{
     }
 
     render(){
-        const {url} = this.props.match;
-        //console.log(this.props);
+        
         const {login, register, loginOut} = this.props;
         return(
             <div>
@@ -38,12 +39,14 @@ class Front extends Component{
                 <div className={style.container}>
                     <div className={style.contentContainer}>
                         <div className={style.content}>
+                        
                             <Switch>
-                                <Route exact path={url} component={Home}/>
-                                <Route path={`/detail/:id`} component={Detail}/>
-                                <Route path={`/:tag`} component={Home}/>
+                                <Route exact path="/" component={Home}/>
+                                <Route exact path="/detail/:id" component={Detail}/>                                
+                                <Route exact path="/tag/:id" component={Home}/>
                                 <Route component={NotFound}/>
                             </Switch>
+                        
                         </div>
                         <div className={`${style.loginContainer}`}>
                             {this.props.userInfo.userId ?
@@ -70,6 +73,7 @@ Front.propTypes = {
 };
 
 function mapStateToProps(state) {
+    //console.log(state);
     return {
         categories:state.admin.tags,
         userInfo: state.globalState.userInfo

@@ -1,0 +1,54 @@
+.container{
+    position:relative;
+    background-color:#fff;
+    width:100%;
+}
+
+.container .menu {
+    width:80%;
+    display:flex;
+    flex-wrap:wrap;
+    margin:0 auto;
+}
+
+.container .menu li {
+    width:10%;
+    padding:0;
+    text-align:center;
+}
+
+.container .menu li:hover {
+    background-color:rgba(24, 144, 255, 0.1);
+    border-bottom:none;
+}
+
+.container .menu .item {
+    display:inline-flex;
+    align-items: center;
+    font-size:12px;
+    font-weight:600;
+}
+
+.container .menu .num {
+    display:inline-block;
+    padding:4px 10px;
+    font-weight:normal;
+    line-height:12px;
+    margin-left:4px;
+    color:#1d1c1c;
+    border-radius:10px;
+    background-color:#f7f7f7;
+}
+
+.container .button {
+    width:20px;
+    height:20px;
+    line-height:20px;
+    text-align:center;
+    font-size:12px;
+    right:8%;
+    top:24px;
+    margin-top:-10px;
+    position:absolute;
+
+}

@@ -21,7 +21,3 @@ render(
     ,
     mountNode
 );
-
-if(module.hot && process.env.NODE_ENV !== 'production'){
-    module.hot.accept();
-}

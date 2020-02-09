@@ -1,4 +1,4 @@
-import {reducer as front} from './frontReducer'
+import front from './frontReducer'
 import {combineReducers} from 'redux'
 import admin from './admin'
 
@@ -23,11 +23,10 @@ export const actionsTypes = {
 };
 
 export const actions = {
-    get_login: function (username, password) {
+    get_login: function (data) {
         return {
             type: actionsTypes.USER_LOGIN,
-            username,
-            password
+            data
         }
     },
     get_register: function (data) {
@@ -39,6 +38,13 @@ export const actions = {
     get_loginout:function(){
         return {
             type:actionsTypes.USER_LOGINOUT
+        }
+    },
+    set_msg:function(msgType, msgContent){
+        return {
+            type:actionsTypes.SET_MESSAGE,
+            msgType,
+            msgContent
         }
     },
     clear_msg: function () {

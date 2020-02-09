@@ -12,5 +12,20 @@ module.exports = {
         responseData.message = message;
         responseData.data = data;
         res.status(httpCode).json(responseData)
+    },
+    selectContentByUniquekey(content){
+        var multiContents = '';
+        var result ;
+        var pattern = /<(p)[^>]*>(.*)<\/\1>/g;
+        result = pattern.exec(content);
+        
+        while ( result ){
+          multiContents += result[2]
+          result = pattern.exec(content);
+        }
+        
+        return multiContents;
     }
+
+
 }

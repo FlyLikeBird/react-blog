@@ -16,15 +16,16 @@ import session from 'express-session'
 const port = config.apiPort;
 
 const app = new Express();
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+
 app.use(cookieParser('express_react_cookie'));
 app.use(session({
     secret:'express_react_cookie',
     resave: true,
     saveUninitialized:true,
-    cookie: {maxAge: 60 * 1000 * 30}//过期时间
+    cookie: {maxAge: 8640 * 1000 * 100 }//过期时间
 }));
-
 
 //前端页面路由
 app.use('/', require('./main'));
@@ -32,7 +33,7 @@ app.use('/', require('./main'));
 app.use('/admin', require('./admin'));
 
 mongoose.Promise = require('bluebird');
-mongoose.connect(`mongodb://${config.dbHost}:${config.dbPort}/blog`, function (err) {
+mongoose.connect(`mongodb://${config.dbHost}:${config.dbPort}/react-blog`, function (err) {
     if (err) {
         console.log(err, "数据库连接失败");
         return;

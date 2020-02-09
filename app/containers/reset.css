@@ -52,6 +52,9 @@ body {
     background: #eee;
 }
 
+.ant-form-item {
+    margin-bottom:10px;
+}
 
 
 

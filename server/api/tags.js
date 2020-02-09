@@ -1,13 +1,13 @@
 import Express from 'express'
 
 const router = Express.Router();
-import Tags from '../../models/tags'
+import Tag from '../../models/Tag';
 import {responseClient} from '../util'
 
 //删除标签
 router.get('/delTag', function (req, res) {
     let {name} = req.query;
-    Tags.remove({name})
+    Tag.remove({name})
         .then(result => {
             if(result.result.n === 1){
                 responseClient(res,200,0,'删除成功!')
@@ -22,11 +22,11 @@ router.get('/delTag', function (req, res) {
 //添加标签
 router.post('/addTag', function (req, res) {
     let {name} = req.body;
-    Tags.findOne({
+    Tag.findOne({
         name
     }).then(result => {
         if (!result) {
-            let tag = new Tags({
+            let tag = new Tag({
                 name
             });
             tag.save()
