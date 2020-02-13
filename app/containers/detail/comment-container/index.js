@@ -50,8 +50,9 @@ CommentContainer.propTypes = {
 }
 
 function mapStateToProps(state) {
+    console.log(state);
     return {
-        comments:getComments(state),
+        comments:getComments(state.front.comments),
         pageNum:state.front.comments.byId.pageNum,
         total:state.front.comments.byId.total
     }

@@ -1,10 +1,10 @@
-import React from 'react';
+import React ,{ Component, PureComponent } from 'react';
 import { Form, Input, Button ,Select, Icon, Upload, Modal } from 'antd';
 import style from './comment-input.style.css';
 const FormItem = Form.Item;
 const { TextArea } = Input;
 
-class CommentInput extends React.Component{
+class CommentInput extends PureComponent{
     constructor(){
         super();
         this.state= {
@@ -100,12 +100,19 @@ class CommentInput extends React.Component{
     }   
         
     handleChange({ fileList }){
-        console.log(fileList);
         this.setState({ fileList });
     } 
 
+    shouldComponentUpdate(nextProps, nextState){
+        console.log(nextProps);
+        console.log(nextState);
+        console.log('----');
+        console.log(this.props);
+        console.log(this.state);
+        return false;
+    }
     render(){
-        
+        console.log('input render');
         var { getFieldDecorator } = this.props.form;
         var { fileList } = this.state;
         const uploadButton = (

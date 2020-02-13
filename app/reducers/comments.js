@@ -1,7 +1,7 @@
 import {combineReducers} from 'redux'
 
 var initialState = {
-    byId:{
+    byId:{  
         total:0,
         pageNum:1
     },
@@ -15,7 +15,8 @@ export const actionTypes = {
     OPERATE_COMMENT_START:'OPERATE_COMMENT_START',
     OPERATE_COMMENT_RESULT:'OPERATE_COMMENT_RESULT',
     OPEN_REPLY:'OPEN_REPLY',
-    ADD_REPLY:'ADD_REPLY'
+    ADD_REPLY:'ADD_REPLY',
+    RECEIVE_REPLY:'RECEIVE_REPLY'
 };
 
 export const actions = { 
@@ -33,12 +34,13 @@ export const actions = {
             data
         }
     },
-    operate_comment:function( commentid, action, isCancel ){
+    operate_comment:function( commentid, action, isCancel, parentcommentid ){
         return {
             type:actionTypes.OPERATE_COMMENT_START,
             commentid,
             action,
-            isCancel
+            isCancel,
+            parentcommentid
         }
     },
     open_reply:function(commentid){
@@ -56,32 +58,119 @@ export const actions = {
     }
 };
 
-function reply(state, action){
+function reply(state, action, user){
+    switch(action.type){
+       case actionTypes.OPERATE_COMMENT_RESULT:
+            var { operateType } = action;
+            return {
+                ...state,
+                replies:[
+                    ...state.replies,
 
+                ]
+            }
+       default:
+            return {
+                ...state,
+                visible:false,
+                isLiked:state.likeUsers.map(item=>item.user._id).includes(user) ? true : false,
+                isDisliked:state.dislikeUsers.map(item=>item.user_id).includes(user) ? true : false
+            }
+    }
 }
 
+function allReplies(state=[], action){
+    switch(action.type){
+        default : 
+            return state;
+    }
+}
+
+function replyById(state={}, action){
+    switch(action.type){
+        default:
+            return state;
+    }
+}
+
+function getReply(state, user){
+    var obj = {};
+    obj.replyById = state.reduce((result, subComment)=>{
+        subComment.visible = false;
+        subComment.isLiked = subComment.likeUsers.map(item=>item.user._id).includes(user) ? true : false;
+        subComment.isDisliked = subComment.dislikeUsers.map(item=>item.user._id).includes(user) ? true : false ;
+        result[subComment._id] = subComment;
+        return result;
+    },{});
+    obj.replyIds = state.map(item=>item._id);
+    return obj;
+}
+
+function reply(state, action){
+    switch(action.type){
+        case actionTypes.OPERATE_COMMENT_RESULT:
+            var { operateType, data, commentid, parentcommentid } = action;
+            var option = operateType === 'like' ? 'isLiked' : 'isDisliked';
+            return {
+                ...state,
+                [commentid]:{
+                    [option]:!state[commentid][option],
+                    [operateType+'Users']:data
+                }
+            }
+    }
+}
+/*
+reply:{
+            repliesIds:[],
+            replyById:{
+                total:0,
+                pageNum:1
+            }
+        } 
+*/  
 function byId(state = initialState.byId, action){
     switch(action.type){
         case actionTypes.RECEIVE_COMMENTS:
+            var { user, data } = action;
             return {
                 ...state,
-                ...action.data.comments.reduce((obj, comment)=>{
-                    comment.visible = false;
+                ...data.comments.reduce((obj, comment)=>{
+                    comment.visible = false; 
+                    comment.isLiked = comment.likeUsers.map(item=>item.user._id).includes(user) ? true : false;
+                    comment.isDisliked = comment.dislikeUsers.map(item=>item.user._id).includes(user) ? true : false ;
+                    //comment.replies =  getReply(comment.replies, user);               
                     obj[comment._id] = comment;
                     return obj;
                 },{}),
-                total:action.data.total,
-                pageNum:action.data.pageNum
+                total:data.total,
+                pageNum:data.pageNum
             }
         case actionTypes.OPERATE_COMMENT_RESULT:
-            var type = action.operateType ; 
-            return {
-                ...state,
-                [action.commentid] : {
-                    ...state[action.commentid],
-                    [type+'Users']:action.data
+            var { operateType, data, commentid, parentcommentid } = action;
+            var option = operateType === 'like' ? 'isLiked' : 'isDisliked';
+            if (parentcommentid){
+                return {
+                    ...state,
+                    [parentcommentid]:{
+                        ...state[parentcommentid],
+                        replies:{
+                            ...state[parentcommentid].replies,
+
+                        }
+                    }
                 }
-            }       
+            } else {
+                return {
+                    ...state,
+                    [commentid] : {
+                        ...state[commentid],
+                        [option]:!state[commentid][option],
+                        [operateType+'Users']:data
+                    }
+                }  
+            }
+                 
         case actionTypes.OPEN_REPLY:
             return {
                 ...state,
@@ -90,10 +179,14 @@ function byId(state = initialState.byId, action){
                     visible:!state[action.commentid].visible
                 }
             }
-        case actionTypes.ADD_REPLY:
+        case actionTypes.RECEIVE_REPLY:
+            console.log(action.commentid);
             return {
-                ...state
-                
+                ...state,
+                [action.commentid]:{
+                    ...state[action.commentid],
+                    replies:action.data.comments.map(subComment=>reply(subComment,action))
+                }              
             }
         default :
             return state;
@@ -110,14 +203,19 @@ function allIds(state= initialState.allIds, action){
 }
 
 export function getComments(state){
-    var userid = state.globalState.userInfo.userId;
-    var comments = state.front.comments;
-    return comments.allIds.map(id=>{
-        var comment = comments.byId[id];
-        comment.isLiked = comment.likeUsers.map(item=>item.user._id).includes(userid) ? true : false;
-        comment.isDisliked = comment.dislikeUsers.map(item=>item.user._id).includes(userid) ? true : false ;
-        return comment;
+    console.log(state);
+    return state.allIds.map(id=>state.byId[id])
+    /*
+    return state.allIds.map(id=>{
+        var comment = state.byId[id] ;
+        var obj = {...comment};
+        obj.replies = comment.replies.replyIds.map(id=>{
+            return comment.replies.replyById[id];
+        })
+        
+        return obj;
     })
+    */
 }
 
 export default combineReducers({

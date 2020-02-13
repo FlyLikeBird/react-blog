@@ -9,8 +9,9 @@ import CommentList from '../comment-list'
 export default class CommentItem extends Component{
     
     render(){
-        const { data, onAddReply, parentcommentid, uniquekey, onOpenReply, onLikeAndDislike } = this.props;
-        const { content, fromUser, date, likeUsers, dislikeUsers, isLiked, isDisliked, fromSubTextarea, images, isSub, replies , _id, visible } = data;
+        var { data, onAddReply, parentcommentid, uniquekey, onOpenReply, onLikeAndDislike } = this.props;
+        var { content, fromUser, date, likeUsers, dislikeUsers, isLiked, isDisliked, fromSubTextarea, images, isSub, replies , _id, visible } = data;
+        parentcommentid = parentcommentid ? parentcommentid : '';
         return(
             <div className={style.container}>
                 <div className={style['avatar-container']}><img src={fromUser && fromUser.userImage} /></div>
@@ -31,7 +32,7 @@ export default class CommentItem extends Component{
                     </div>
                     <div className={style['button-container']}>
                         <span>
-                            <span className={style.text} onClick={ ()=>onLikeAndDislike( _id, 'like', isLiked==true ? 'true':'')}>
+                            <span className={style.text} onClick={ ()=>onLikeAndDislike( _id, 'like', isLiked==true ? 'true':'', parentcommentid)}>
                                 <Icon type="like" theme={isLiked ? 'filled':'outlined'} style={{color:isLiked ? '#108ee9' : 'rgba(0, 0, 0, 0.65)'}}/>
                                 <span>{ isLiked ? `取消赞成${likeUsers.length}` : `赞成${likeUsers.length}`}</span>
                             </span>
@@ -40,7 +41,7 @@ export default class CommentItem extends Component{
                             </Popover>
                         </span>
                         <span>
-                            <span className={style.text} onClick={ ()=>onLikeAndDislike(_id, 'dislike', isDisliked==true ? 'true':'')}>
+                            <span className={style.text} onClick={ ()=>onLikeAndDislike(_id, 'dislike', isDisliked==true ? 'true':'', parentcommentid)}>
                                 <Icon type="dislike" theme={isDisliked ? 'filled':'outlined'} style={{color:isDisliked ? '#108ee9' : 'rgba(0, 0, 0, 0.65)'}}/>
                                 <span>{ isDisliked ? `取消反对${dislikeUsers.length}` : `反对${dislikeUsers.length}`}</span>
                             </span>
@@ -54,7 +55,13 @@ export default class CommentItem extends Component{
                         </span>
                     </div>
                     <div style={{display:visible ? 'block' : 'none'}}>
-                        <CommentInput uniquekey={uniquekey} commentid={_id} parentcommentid={parentcommentid ? parentcommentid : ''} forReply={true} onAddReply={onAddReply} />
+                        {
+                            visible 
+                            ?
+                            <CommentInput uniquekey={uniquekey} commentid={_id} parentcommentid={parentcommentid} forReply={true} onAddReply={onAddReply} />
+                            :
+                            null
+                        }
                     </div>
                     {
                         !isSub && replies && replies.length

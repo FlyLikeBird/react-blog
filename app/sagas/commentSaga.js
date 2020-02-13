@@ -20,9 +20,10 @@ function* operateCommentFlow(){
         var state = yield select();
         var user = state.globalState.userInfo.userId;
         if (user){
-            var res = yield call(operateComment, req.commentid, user, req.action, req.isCancel );
+            var { commentid, action, isCancel, parentcommentid } = req;
+            var res = yield call(operateComment, commentid, user, action, isCancel );
             if ( res && res.code === 1){
-                yield put({type:CommentActionTypes.OPERATE_COMMENT_RESULT, data:res.data, commentid:req.commentid, operateType:req.action});
+                yield put({type:CommentActionTypes.OPERATE_COMMENT_RESULT, data:res.data, commentid, operateType:action, parentcommentid});
             } else {
                 yield put({type:IndexActionTypes.SET_MESSAGE, msgContent:res.message, msgType:0});
             }
@@ -45,12 +46,14 @@ function* getComments(uniquekey, pageNum, sort) {
 
 function* getCommentsFlow () {
     while (true){
-        let req = yield take(CommentActionTypes.FETCH_COMMENTS);
-        let res = yield call(getComments, req.uniquekey, req.pageNum, req.sort);
+        var req = yield take(CommentActionTypes.FETCH_COMMENTS);
+        var res = yield call(getComments, req.uniquekey, req.pageNum, req.sort);
+        var state = yield select();
+        var user = state.globalState.userInfo.userId;
         if(res){
             if(res.code === 1){
                 res.data.pageNum = req.pageNum;
-                yield put({type: CommentActionTypes.RECEIVE_COMMENTS,data:res.data});
+                yield put({type: CommentActionTypes.RECEIVE_COMMENTS,data:res.data ,user});
             }else{
                 yield put({type: IndexActionTypes.SET_MESSAGE, msgContent: res.message, msgType: 0});
             }
@@ -79,7 +82,7 @@ function* addCommentFlow () {
             var res = yield call(addComment, req.data);
             if(res.code === 1){
                 res.data.pageNum = 1;
-                yield put({type: CommentActionTypes.RECEIVE_COMMENTS, data:res.data });
+                yield put({type: CommentActionTypes.RECEIVE_COMMENTS, data:res.data, user });
             }else{
                 yield put({type: IndexActionTypes.SET_MESSAGE, msgContent: res.message, msgType: 0});
             }
@@ -109,8 +112,10 @@ function* addReplyFlow(){
             req.data.append('user',user);
             var res = yield call(addReply, req.data);
             if(res.code === 1){
-
-                yield put({type: CommentActionTypes.RECEIVE_REPLY, data:res.data });
+                var commentid = req.data.get('commentid');
+                var parentcommentid = req.data.get('parentcommentid');
+                console.log(commentid, parentcommentid);
+                yield put({type: CommentActionTypes.RECEIVE_REPLY, data:res.data, user, commentid: parentcommentid ? parentcommentid : commentid});
             }else{
                 yield put({type: IndexActionTypes.SET_MESSAGE, msgContent: res.message, msgType: 0});
             }

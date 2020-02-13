@@ -33,7 +33,8 @@ var storage = multer.diskStorage({
 var upload = multer({storage});
 
 function getComments(res, commentid, uniquekey, pageNum=1, sort='time'){
-    var skip = (pageNum - 1) < 0 ? 0 : (pageNum - 1) * 10;
+    var num = commentid ? 5 : 10;
+    var skip = (pageNum - 1) < 0 ? 0 : (pageNum - 1) * num;
     var filter = commentid ? { _id : commentid} : { related: uniquekey };
     var sortCondition;
     switch(sort){
@@ -76,11 +77,11 @@ function getComments(res, commentid, uniquekey, pageNum=1, sort='time'){
                 })
                 .sort(sortCondition)
                 .skip(skip)
-                .limit(10)
+                .limit(num)
                 .then(comments=>{
                     if ( commentid) {
+                        data.comments = comments[0].replies;
                         data.total = comments[0].replies.length;
-                        data.comments = comments;
                     } else {
                         data.total = count;
                         data.comments = comments ;
@@ -122,6 +123,7 @@ router.post('/addComment',upload.array('images'),(req, res)=>{
 
 router.post('/addReply',upload.array('images'),(req, res)=>{
     var { commentid, parentcommentid, uniquekey, user, content } = req.body;
+    console.log(commentid, parentcommentid , uniquekey, user, content);
     var images = [];
     var date = new Date().toString();
     if(req.files){
@@ -145,9 +147,10 @@ router.post('/addReply',upload.array('images'),(req, res)=>{
     comment.save(()=>{
         var realParentCommentid = parentcommentid ? parentcommentid : commentid ;
         Comment.updateOne({_id:realParentCommentid},{$push:{replies:comment._id}}, (err,result)=>{
-            getComments(res, comment._id);
+            getComments(res, realParentCommentid);
         })
     })
+
 })
 
 router.get('/operateComment',(req,res)=>{
