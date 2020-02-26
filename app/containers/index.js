@@ -1,6 +1,5 @@
 import React, {Component } from 'react'
 import PropTypes from 'prop-types'
-import PureRenderMixiin from 'react-addons-pure-render-mixin'
 import {
     BrowserRouter as Router,
     Route,
@@ -22,15 +21,20 @@ import Admin from "./admin/Admin";
 import Front from './front/Front'
 import Usercenter from './usercenter/Usercenter';
 import animationStyle from '../lib/animate.css'
+import { Map, fromJS, is } from 'immutable';
+import connectRoute from './connectRoute'
+
+
+const NotFoundWrapped = connectRoute(NotFound);
+const AdminWrapped = connectRoute(Admin);
+const FrontWrapped = connectRoute(Front);
 
 const {clear_msg, user_auth} = actions;
 
 class AppIndex extends Component {
-
     constructor(props) {
         super(props);
         this.openNotification = this.openNotification.bind(this);
-        this.shouldComponentUpdate = PureRenderMixiin.shouldComponentUpdate.bind(this);
     }
 
     openNotification(type, message) {
@@ -50,11 +54,12 @@ class AppIndex extends Component {
             <Router>
                 <div>
                     <Switch>
-                        <Route path='/404' component={NotFound}/>
-                        <Route path='/admin' component={Admin}/>
-                        <Route path="/" component={Front}/>
+                        <Route path='/404' component={NotFoundWrapped}/>
+                        <Route path='/admin' component={AdminWrapped}/>
+                        <Route path="/" component={FrontWrapped}/>
                         <Route path="/usercenter/:id" component={Usercenter} />
                     </Switch>
+                    { isFetching && <Loading /> }
                     {this.props.notification && this.props.notification.content ?
                         (this.props.notification.type === 1 ?
                             this.openNotification('success', this.props.notification.content) :

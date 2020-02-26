@@ -23,7 +23,8 @@ function* operateCommentFlow(){
             var { commentid, action, isCancel, parentcommentid } = req;
             var res = yield call(operateComment, commentid, user, action, isCancel );
             if ( res && res.code === 1){
-                yield put({type:CommentActionTypes.OPERATE_COMMENT_RESULT, data:res.data, commentid, operateType:action, parentcommentid});
+                var data = { user:state.globalState.userInfo, date:new Date().toString()};
+                yield put({type:CommentActionTypes.OPERATE_COMMENT_RESULT, data, commentid, operateType:action, parentcommentid});
             } else {
                 yield put({type:IndexActionTypes.SET_MESSAGE, msgContent:res.message, msgType:0});
             }
@@ -40,7 +41,7 @@ function* getComments(uniquekey, pageNum, sort) {
     } catch (err) {
         yield put({type: IndexActionTypes.SET_MESSAGE, msgContent: '网络请求错误', msgType: 0});
     } finally {
-        yield put({type: IndexActionTypes.FETCH_END})
+       yield put({type: IndexActionTypes.FETCH_END})
     }
 }
 
@@ -114,8 +115,8 @@ function* addReplyFlow(){
             if(res.code === 1){
                 var commentid = req.data.get('commentid');
                 var parentcommentid = req.data.get('parentcommentid');
-                console.log(commentid, parentcommentid);
-                yield put({type: CommentActionTypes.RECEIVE_REPLY, data:res.data, user, commentid: parentcommentid ? parentcommentid : commentid});
+                yield put({type: CommentActionTypes.RECEIVE_REPLY, data:res.data, user, commentid:parentcommentid ? parentcommentid:commentid });
+                yield put({type:CommentActionTypes.OPEN_REPLY, commentid, parentcommentid});
             }else{
                 yield put({type: IndexActionTypes.SET_MESSAGE, msgContent: res.message, msgType: 0});
             }

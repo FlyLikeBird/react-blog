@@ -1,6 +1,8 @@
 import front from './frontReducer'
-import {combineReducers} from 'redux'
+//import {combineReducers} from 'redux-immutable'
+import { combineReducers } from 'redux'
 import admin from './admin'
+
 
 const initialState = {
     isFetching: true,
@@ -8,7 +10,8 @@ const initialState = {
         type: 1,//0失败 1成功
         content: ''
     },
-    userInfo: {}
+    userInfo: {},
+    userAuth:true
 };
 
 export const actionsTypes = {
@@ -86,7 +89,7 @@ export function reducer(state = initialState, action) {
             };
         case actionsTypes.RESPONSE_USER_INFO:
             return {
-                ...state, userInfo: action.data
+                ...state, userInfo: action.data, userAuth:false
             };
         default:
             return state

@@ -1,4 +1,4 @@
-import React,{Component} from 'react';
+import React,{ PureComponent} from 'react';
 import PropTypes from 'prop-types';
 import { Button, Input, Pagination } from 'antd';
 import { connect } from 'react-redux';
@@ -10,18 +10,21 @@ import CommentList from './components/comment-list';
 import CommentInput from './components/comment-input';
 
 var { set_msg } = IndexActions ;
-var { add_comment, get_article_comments, operate_comment, open_reply, add_reply } = CommentActions;
+var { add_comment, get_article_comments, operate_comment, open_reply, add_reply, toggle_reply } = CommentActions;
 
-class CommentContainer extends Component{
+class CommentContainer extends PureComponent{
+    
     render(){
-        const { uniquekey, comments, pageNum, total, get_article_comments, add_comment, open_reply, add_reply, onLikeAndDislike } = this.props;
+        const { uniquekey, user, data, pageNum, total, get_article_comments, add_comment, open_reply, add_reply, toggle_reply, onLikeAndDislike } = this.props;
+        console.log('container render()');
         return(
             <div>
                 <CommentInput onAddComment={add_comment} uniquekey={uniquekey}/>
                 <CommentList 
-                    comments={comments} 
+                    comments={data}                   
                     onOpenReply={open_reply}
-                    onAddReply={add_reply} 
+                    onAddReply={add_reply}
+                    onToggleReply={toggle_reply} 
                     uniquekey={uniquekey} 
                     onLikeAndDislike={onLikeAndDislike}
                 />
@@ -43,7 +46,7 @@ class CommentContainer extends Component{
 
 CommentContainer.propTypes = {
     uniquekey:PropTypes.string.isRequired,
-    comments:PropTypes.array.isRequired,
+    data:PropTypes.array.isRequired,
     add_comment:PropTypes.func.isRequired,
     onLikeAndDislike:PropTypes.func.isRequired,
     get_article_comments:PropTypes.func.isRequired,
@@ -51,20 +54,22 @@ CommentContainer.propTypes = {
 
 function mapStateToProps(state) {
     console.log(state);
+    var { data, pageNum, total } = state.front.comments;
     return {
-        comments:getComments(state.front.comments),
-        pageNum:state.front.comments.byId.pageNum,
-        total:state.front.comments.byId.total
+        data,
+        pageNum,
+        total
     }
 }
 
 function mapDispatchToProps(dispatch) {
-    return {
+    return {      
         add_comment : bindActionCreators(add_comment, dispatch),
         get_article_comments:bindActionCreators(get_article_comments, dispatch),
         onLikeAndDislike:bindActionCreators(operate_comment, dispatch),
         open_reply:bindActionCreators(open_reply, dispatch),
-        add_reply:bindActionCreators(add_reply, dispatch)
+        add_reply:bindActionCreators(add_reply, dispatch),
+        toggle_reply:bindActionCreators(toggle_reply, dispatch)
     }
 }
 

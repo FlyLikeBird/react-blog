@@ -9,6 +9,12 @@ import config from '../config/config'
 const app = new Express();
 const port = config.port;
 
+
+const targetUrl = `http://${config.apiHost}:${config.apiPort}`;
+const proxy = httpProxy.createProxyServer({
+    target:targetUrl
+});
+
 app.use('/api',(req,res)=>{
     proxy.web(req,res,{target:targetUrl})
 });
@@ -18,11 +24,6 @@ app.use('/', connectHistoryApiFallback());
 app.use('/',Express.static(path.join(__dirname,"..",'build')));
 app.use('/',Express.static(path.join(__dirname,"..",'static')));
 
-
-const targetUrl = `http://${config.apiHost}:${config.apiPort}`;
-const proxy = httpProxy.createProxyServer({
-    target:targetUrl
-});
 
 app.use(compression());
 app.use(favicon(path.join(__dirname,'..','static','favicon.ico')));

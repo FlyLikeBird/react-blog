@@ -1,13 +1,12 @@
-import React,{Component,PropTypes} from 'react'
+import React,{ PureComponent } from 'react'
 import PureRenderMixin from 'react-addons-pure-render-mixin'
 import {ArticleItem} from "../article-item/ArticleItem";
 
-export default class ArticleList extends Component{
+export default class ArticleList extends PureComponent{
     constructor(props){
         super(props);
-        this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this)
     }
-
+    
     render(){
         return(
             <div>

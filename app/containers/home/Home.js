@@ -1,45 +1,53 @@
 import React, {Component, PropTypes} from 'react'
 import PureRenderMixin from 'react-addons-pure-render-mixin'
+import BaseComponent from '../BaseComponent'
 import {
     Redirect
 } from 'react-router-dom'
 import style from './style.css'
 import ArticleList from "./components/article-list/ArticleList";
-import {Pagination} from 'antd';
+import {Pagination } from 'antd';
+import { Loading } from '../components/loading/Loading'
 import {connect} from 'react-redux'
 import {bindActionCreators} from 'redux'
 import {actions as frontActions} from '../../reducers/frontReducer'
-const {get_article_list,get_article_detail} = frontActions;
+const {get_article_list } = frontActions;
 
 class Home extends Component {
     constructor(props) {
-        super(props);
-        this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this)
+        super(props); 
     }
 
     render() {
-        const {tags} = this.props;
-        localStorage.setItem('userInfo', JSON.stringify(this.props.userInfo));
+        const { tags, isFetching } = this.props;
+        console.log('home render()...');
         return (
             tags.length > 1 && this.props.match.params.tag && (tags.indexOf(this.props.match.params.tag) === -1 || this.props.location.pathname.lastIndexOf('\/') > 0)
                 ?
                 <Redirect to='/404'/>
                 :
                 <div className={style.container}>
-                    <ArticleList
-                        history={this.props.history}
-                        data={this.props.articleList}
-                        getArticleDetail={this.props.get_article_detail}
-                    />
-                    <div className={style.paginationContainer}>
-                        <Pagination
-                            defaultPageSize={10}
-                            onChange={(pageNum) => {
-                                this.props.get_article_list(this.props.match.params.id || '', pageNum);
-                            }}
-                            current={this.props.pageNum}
-                            total={this.props.total}/>
-                    </div>
+                    {
+                        isFetching
+                        ?
+                        <Loading />
+                        :
+                        <div>
+                            <ArticleList
+                                history={this.props.history}
+                                data={this.props.articleList}
+                            />
+                            <div className={style.paginationContainer}>
+                                <Pagination
+                                    defaultPageSize={10}
+                                    onChange={(pageNum) => {
+                                        this.props.get_article_list(this.props.match.params.id || '', pageNum);
+                                    }}
+                                    current={this.props.pageNum}
+                                    total={this.props.total}/>
+                            </div>
+                        </div>
+                    }                    
                 </div>
         )
     }
@@ -64,17 +72,17 @@ Home.propsTypes = {
 
 function mapStateToProps(state) {
     return {
+        isFetching:state.front.article.isFetching,
         tags: state.admin.tags,
         pageNum: state.front.article.pageNum,
         total: state.front.article.total,
-        articleList: state.front.article.articleList
+        articleList: state.front.article.articleList,
     }
 }
 
 function mapDispatchToProps(dispatch) {
     return {
-        get_article_list: bindActionCreators(get_article_list, dispatch),
-        get_article_detail:bindActionCreators(get_article_detail,dispatch)
+        get_article_list: bindActionCreators(get_article_list, dispatch)
     }
 }
 

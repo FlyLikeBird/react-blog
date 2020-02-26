@@ -42,7 +42,8 @@ class CommentInput extends PureComponent{
 
     }
 
-    checkComments(rule,value,callback){     
+    checkComments(rule,value,callback){ 
+      console.log(value);    
       if (value && value.match(/^\s+$/)){
         callback('请输入正常的评论内容！');
       } else {
@@ -103,16 +104,7 @@ class CommentInput extends PureComponent{
         this.setState({ fileList });
     } 
 
-    shouldComponentUpdate(nextProps, nextState){
-        console.log(nextProps);
-        console.log(nextState);
-        console.log('----');
-        console.log(this.props);
-        console.log(this.state);
-        return false;
-    }
     render(){
-        console.log('input render');
         var { getFieldDecorator } = this.props.form;
         var { fileList } = this.state;
         const uploadButton = (

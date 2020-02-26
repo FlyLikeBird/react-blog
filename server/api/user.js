@@ -21,6 +21,7 @@ router.post('/login', upload.single(), (req, res) => {
             data.username = userInfo.username;
             data.userType = userInfo.type;
             data.userId = userInfo._id;
+            data.userImage = userInfo.userImage;
             //登录成功后设置session
             req.session.userInfo = data;
             responseClient(res, 200, 1, '登录成功', data);

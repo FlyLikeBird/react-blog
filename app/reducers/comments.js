@@ -1,11 +1,10 @@
 import {combineReducers} from 'redux'
+import { fromJS } from 'immutable';
 
 var initialState = {
-    byId:{  
-        total:0,
-        pageNum:1
-    },
-    allIds:[]
+    total:0,
+    pageNum:1,
+    data:[]
 };
 
 export const actionTypes = {
@@ -16,7 +15,9 @@ export const actionTypes = {
     OPERATE_COMMENT_RESULT:'OPERATE_COMMENT_RESULT',
     OPEN_REPLY:'OPEN_REPLY',
     ADD_REPLY:'ADD_REPLY',
-    RECEIVE_REPLY:'RECEIVE_REPLY'
+    RECEIVE_REPLY:'RECEIVE_REPLY',
+    TOGGLE_REPLY:'TOGGLE_REPLY',
+    CHECK_USER_LOGIN:'CHECK_USER_LOGIN'
 };
 
 export const actions = { 
@@ -43,10 +44,11 @@ export const actions = {
             parentcommentid
         }
     },
-    open_reply:function(commentid){
+    open_reply:function(commentid, parentcommentid){
         return {
             type:actionTypes.OPEN_REPLY,
-            commentid
+            commentid,
+            parentcommentid
         }
     },
     add_reply:function(data){
@@ -55,171 +57,165 @@ export const actions = {
             data
 
         }
+    },
+    toggle_reply:function(pageNum, commentid){
+        return {
+            type:actionTypes.TOGGLE_REPLY,
+            pageNum,
+            commentid
+        }
     }
 };
 
-function reply(state, action, user){
-    switch(action.type){
-       case actionTypes.OPERATE_COMMENT_RESULT:
-            var { operateType } = action;
-            return {
-                ...state,
-                replies:[
-                    ...state.replies,
-
-                ]
-            }
-       default:
-            return {
-                ...state,
-                visible:false,
-                isLiked:state.likeUsers.map(item=>item.user._id).includes(user) ? true : false,
-                isDisliked:state.dislikeUsers.map(item=>item.user_id).includes(user) ? true : false
-            }
-    }
-}
-
-function allReplies(state=[], action){
-    switch(action.type){
-        default : 
-            return state;
-    }
-}
-
-function replyById(state={}, action){
-    switch(action.type){
-        default:
-            return state;
-    }
-}
-
-function getReply(state, user){
-    var obj = {};
-    obj.replyById = state.reduce((result, subComment)=>{
-        subComment.visible = false;
-        subComment.isLiked = subComment.likeUsers.map(item=>item.user._id).includes(user) ? true : false;
-        subComment.isDisliked = subComment.dislikeUsers.map(item=>item.user._id).includes(user) ? true : false ;
-        result[subComment._id] = subComment;
-        return result;
-    },{});
-    obj.replyIds = state.map(item=>item._id);
-    return obj;
-}
-
-function reply(state, action){
+function byId(state, action){
     switch(action.type){
         case actionTypes.OPERATE_COMMENT_RESULT:
-            var { operateType, data, commentid, parentcommentid } = action;
+            var { data, operateType } = action;
             var option = operateType === 'like' ? 'isLiked' : 'isDisliked';
+            if (state[option]){
+                // 取消点赞、反对状态
+                state[operateType+'Users'].pop();
+                state[option] = !state[option]
+            } else {
+                state[operateType+'Users'].push(data);
+                state[option] = !state[option];
+            } 
+            return {...state};
+        case actionTypes.OPEN_REPLY:
+            state.visible = !state.visible;
+            return {...state};
+    }
+}
+
+function byReply(state, action){
+    state.replyObj = {
+        ...state.replyObj,
+        subComments:state.replyObj.subComments.map(reply=>{
+            if (reply._id === action.commentid) return byId(reply, action);
+            return reply;
+        })
+    }
+    return {...state};
+}
+
+/*
+
+    replies = {
+        total,
+        pageNum,
+        subComments,
+    }
+*/
+function checkComments(comments, user){
+    return comments.map(item=>{
+            item.isLiked = item.likeUsers.map(item=>item.user._id).includes(user) ? true : false;
+            item.isDisliked = item.dislikeUsers.map(item=>item.user._id).includes(user) ? true : false;
+            item.replyObj = reduceReply(item.replies, user);
+            return { ...item };
+        })
+}
+
+function reduceReply(state, user, pageNum=1){
+    var startIndex = ( pageNum - 1) *5;
+    var endIndex = 5 * pageNum ;
+    var subComments = state.slice(startIndex, endIndex).map(reply=>{
+        reply.isLiked = reply.likeUsers.map(item=>item.user._id).includes(user) ? true : false;
+        reply.isDisliked = reply.dislikeUsers.map(item=>item.user._id).includes(user) ? true : false;
+        return reply;
+    })
+    return {
+        total:state.length,
+        pageNum,
+        subComments
+    }
+}
+
+export default function comments(state=initialState,action){
+    //console.log(action);
+    switch(action.type){  
+        case actionTypes.CHECK_USER_LOGIN:
             return {
                 ...state,
-                [commentid]:{
-                    [option]:!state[commentid][option],
-                    [operateType+'Users']:data
+                data:checkComments(state.data, action.user)
+            };
+        case actionTypes.RECEIVE_COMMENTS:
+            var { data, user } = action;
+            var comments = checkComments(data.comments, user);
+            return {
+                ...state,
+                data:comments,
+                pageNum:data.pageNum,
+                total:data.total
+            }
+        case actionTypes.OPERATE_COMMENT_RESULT:
+            var { commentid, parentcommentid } = action;
+            if (parentcommentid){
+                // 二级评论
+                return {
+                    ...state,
+                    data:state.data.map(item=>{
+                        if(item._id === parentcommentid) return byReply(item,action);                                                      
+                        return item;
+                    })
+                }
+            } else {
+                // 一级评论
+                return {
+                    ...state,
+                    data:state.data.map(item=>{                        
+                        if (item._id === commentid) return byId(item, action);
+                        return item;
+                    })
                 }
             }
-    }
-}
-/*
-reply:{
-            repliesIds:[],
-            replyById:{
-                total:0,
-                pageNum:1
-            }
-        } 
-*/  
-function byId(state = initialState.byId, action){
-    switch(action.type){
-        case actionTypes.RECEIVE_COMMENTS:
-            var { user, data } = action;
-            return {
-                ...state,
-                ...data.comments.reduce((obj, comment)=>{
-                    comment.visible = false; 
-                    comment.isLiked = comment.likeUsers.map(item=>item.user._id).includes(user) ? true : false;
-                    comment.isDisliked = comment.dislikeUsers.map(item=>item.user._id).includes(user) ? true : false ;
-                    //comment.replies =  getReply(comment.replies, user);               
-                    obj[comment._id] = comment;
-                    return obj;
-                },{}),
-                total:data.total,
-                pageNum:data.pageNum
-            }
-        case actionTypes.OPERATE_COMMENT_RESULT:
-            var { operateType, data, commentid, parentcommentid } = action;
-            var option = operateType === 'like' ? 'isLiked' : 'isDisliked';
+        case actionTypes.OPEN_REPLY:
+            var { commentid, parentcommentid } = action;
             if (parentcommentid){
                 return {
                     ...state,
-                    [parentcommentid]:{
-                        ...state[parentcommentid],
-                        replies:{
-                            ...state[parentcommentid].replies,
-
-                        }
-                    }
+                    data:state.data.map(item=>{
+                        if (item._id === parentcommentid) return byReply(item,action);
+                        return item;
+                    })
                 }
             } else {
                 return {
                     ...state,
-                    [commentid] : {
-                        ...state[commentid],
-                        [option]:!state[commentid][option],
-                        [operateType+'Users']:data
-                    }
-                }  
-            }
-                 
-        case actionTypes.OPEN_REPLY:
-            return {
-                ...state,
-                [action.commentid]:{
-                    ...state[action.commentid],
-                    visible:!state[action.commentid].visible
+                    data:state.data.map(item=>{
+                        if (item._id === commentid) return byId(item, action);
+                        return item;
+                    })
                 }
             }
         case actionTypes.RECEIVE_REPLY:
-            console.log(action.commentid);
+            var { data, user, commentid } = action;
             return {
                 ...state,
-                [action.commentid]:{
-                    ...state[action.commentid],
-                    replies:action.data.comments.map(subComment=>reply(subComment,action))
-                }              
+                data:state.data.map(item=>{
+                    if (item._id ===commentid) {
+                        item.replies = item.replies.concat(data);
+                        item.replyObj = reduceReply(item.replies, user, item.replyObj.pageNum);
+                        return { ...item };
+                    }
+                    return item;
+                })
+                
             }
-        default :
-            return state;
-    }
-}
-
-function allIds(state= initialState.allIds, action){
-    switch(action.type){
-        case actionTypes.RECEIVE_COMMENTS:
-            return action.data.comments.map(item=>item._id);
+        case actionTypes.TOGGLE_REPLY:
+            var { commentid, user, pageNum } = action;
+            return {
+                ...state,
+                data:state.data.map(item=>{
+                    if (item._id === commentid) {
+                        item.replyObj = reduceReply(item.replies, user, pageNum);
+                        return {...item}
+                    }
+                    return item;
+                })
+            }
         default:
             return state;
     }
 }
 
-export function getComments(state){
-    console.log(state);
-    return state.allIds.map(id=>state.byId[id])
-    /*
-    return state.allIds.map(id=>{
-        var comment = state.byId[id] ;
-        var obj = {...comment};
-        obj.replies = comment.replies.replyIds.map(id=>{
-            return comment.replies.replyById[id];
-        })
-        
-        return obj;
-    })
-    */
-}
-
-export default combineReducers({
-    byId,
-    allIds
-})
 

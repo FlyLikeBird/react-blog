@@ -58,7 +58,7 @@ router.get('/getArticles', function (req, res) {
                   return item;
                 })
                 responseData.list = data;
-                responseClient(res, 200, 0, 'success', responseData);
+                responseClient(res, 200, 1, 'success', responseData);
             }).cancel(err => {
             throw err
             })
@@ -75,7 +75,7 @@ router.get('/getArticleDetail', (req, res) => {
         Article.findOne({_id})
           .populate({path:'tags', select:'tag'})
           .then(doc=>{
-              responseClient(res, 200, 0, 'success', doc);
+              responseClient(res, 200, 1, 'ok', doc);
           })
           .catch(err=>{
               throw err;

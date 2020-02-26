@@ -32,10 +32,9 @@ var storage = multer.diskStorage({
 
 var upload = multer({storage});
 
-function getComments(res, commentid, uniquekey, pageNum=1, sort='time'){
-    var num = commentid ? 5 : 10;
-    var skip = (pageNum - 1) < 0 ? 0 : (pageNum - 1) * num;
-    var filter = commentid ? { _id : commentid} : { related: uniquekey };
+function getComments(res, uniquekey, pageNum=1, sort='time'){
+    var skip = (pageNum - 1) < 0 ? 0 : (pageNum - 1) * 10;
+    var filter = { related: uniquekey, isSub:false };
     var sortCondition;
     switch(sort){
         case 'time':
@@ -72,28 +71,54 @@ function getComments(res, commentid, uniquekey, pageNum=1, sort='time'){
                         { path:'likeUsers.user', select:'username userImage'},
                         { path:'dislikeUsers.user', select:'username userImage'},
                         { path: 'fromUser', select:'username userImage'},
+                        { 
+                            path:'replyTo',
+                            select:'fromUser',
+                            populate:{ path:'fromUser', select:'username'}
 
+                        }
                     ]
                 })
                 .sort(sortCondition)
                 .skip(skip)
-                .limit(num)
-                .then(comments=>{
-                    if ( commentid) {
-                        data.comments = comments[0].replies;
-                        data.total = comments[0].replies.length;
-                    } else {
-                        data.total = count;
-                        data.comments = comments ;
-                    }
+                .limit(10)
+                .then(comments=>{                    
+                    data.total = count;
+                    data.comments = comments ;                   
                     responseClient(res, 200, 1, 'ok', data);
                 })
         })
 }
 
+function getOneComment(res, commentid){
+    Comment.findOne({_id:commentid})
+        .populate({
+            path:'fromUser',
+            select:'username userImage'
+        })
+        .populate({
+            path:'likeUsers.user',
+            select:'username userImage'
+        })
+        .populate({
+            path:'dislikeUsers.user',
+            select:'username userImage'
+        })
+        .populate({
+            path:'replyTo',
+            select:'fromUser',
+            populate:{ path:'fromUser', select:'username'}                        
+        })
+        .then(doc=>{
+            console.log(doc);
+            responseClient(res, 200, 1, 'ok', doc);
+        })
+}
+
 router.get('/getComments',(req,res)=>{
     var { uniquekey, pageNum, sort } = req.query;
-    getComments(res, null, uniquekey, pageNum, sort);
+    getComments(res, uniquekey, pageNum, sort);
+
 })
 
 router.post('/addComment',upload.array('images'),(req, res)=>{
@@ -115,15 +140,15 @@ router.post('/addComment',upload.array('images'),(req, res)=>{
         content,
         images
     });
+
     comment.save()
         .then(()=>{
-            getComments(res, null, uniquekey);
+            getComments(res, uniquekey);
         })
 })
 
 router.post('/addReply',upload.array('images'),(req, res)=>{
     var { commentid, parentcommentid, uniquekey, user, content } = req.body;
-    console.log(commentid, parentcommentid , uniquekey, user, content);
     var images = [];
     var date = new Date().toString();
     if(req.files){
@@ -140,17 +165,17 @@ router.post('/addReply',upload.array('images'),(req, res)=>{
         related:uniquekey,
         onModel:'Article',
         isSub:true,
+        images,
         content,
         fromSubTextarea : parentcommentid ? true : false 
     });
-
-    comment.save(()=>{
-        var realParentCommentid = parentcommentid ? parentcommentid : commentid ;
-        Comment.updateOne({_id:realParentCommentid},{$push:{replies:comment._id}}, (err,result)=>{
-            getComments(res, realParentCommentid);
+    comment.save()
+        .then(()=>{
+            var finalCommentid = parentcommentid ? parentcommentid : commentid ;
+            Comment.updateOne({_id:finalCommentid},{$push:{replies:comment._id}},(err,result)=>{
+                getOneComment(res, comment._id);
+            })           
         })
-    })
-
 })
 
 router.get('/operateComment',(req,res)=>{
@@ -162,8 +187,7 @@ router.get('/operateComment',(req,res)=>{
             .populate({ path:'likeUsers.user', select:'username userImage'})
             .populate({ path:'dislikeUsers.user', select:'username userImage'})
             .then(doc=>{
-                var data = action === 'like' ? doc.likeUsers : doc.dislikeUsers;
-                responseClient(res, 200, 1, 'ok', data);
+                responseClient(res, 200, 1, 'ok');
             })
             .catch(err=>{
                 throw err;

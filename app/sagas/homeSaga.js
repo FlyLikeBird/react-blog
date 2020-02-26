@@ -1,7 +1,8 @@
 import { delay } from 'redux-saga'
-import {put, take, call, fork } from 'redux-saga/effects'
+import {put, take, call, fork, select } from 'redux-saga/effects'
 import {get, post} from '../fetch/fetch'
 import {actionsTypes as IndexActionTypes} from '../reducers'
+import { actionTypes as CommentActionTypes } from '../reducers/comments'
 
 export function* login(data) {
     yield put({type: IndexActionTypes.FETCH_START});
@@ -42,7 +43,10 @@ export function* loginFlow() {
         let response = yield call(login, request.data);
         if(response&&response.code === 1){        
             yield put({type:IndexActionTypes.SET_MESSAGE,msgContent:'登录成功!',msgType:1});
-            yield put({type:IndexActionTypes.RESPONSE_USER_INFO,data:response.data})
+            yield put({type:IndexActionTypes.RESPONSE_USER_INFO,data:response.data});
+            var state = yield select();
+            var user = state.globalState.userInfo.userId;
+            yield put({type:CommentActionTypes.CHECK_USER_LOGIN, user});
         }
     }
 }
@@ -73,9 +77,7 @@ export function* user_auth () {
     try {
         yield put({type:IndexActionTypes.FETCH_START});
         let response = yield call(get,'/user/userInfo');
-        if(response && response.code === 1){
-            yield put({type:IndexActionTypes.RESPONSE_USER_INFO,data:response.data})
-        }
+        yield put({type:IndexActionTypes.RESPONSE_USER_INFO,data:response.data});
     }catch (err){
         console.log(err);
     }finally {

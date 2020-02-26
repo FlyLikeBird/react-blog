@@ -1,12 +1,20 @@
-import React,{Component} from 'react'
+import React,{ PureComponent} from 'react'
+import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
 import {Menu, Icon} from 'antd'
 import style from './menu.style.css'
+import { actions } from '../../../reducers/adminManagerTags';
 
-export default class Menus extends Component{
+const { get_all_tags } = actions;
+
+class Menus extends PureComponent{
     constructor(props){
         super(props);
+        this.handleClick = this.handleClick.bind(this);
+        this.handleMouserOut = this.handleMouserOut.bind(this);
+        this.handleMouseOver = this.handleMouseOver.bind(this);
         this.state = {
-            current:this.props.categories[0].tag,
+            current:'首页',
             open:false,
             iconType:'caret-down'
         }
@@ -38,12 +46,17 @@ export default class Menus extends Component{
         }  
     }
 
+    componentDidMount(){
+        this.props.get_all_tags();
+    }
+
     render(){
+        var { categories } = this.props;
         var { iconType, open } = this.state;
         return(
-            <div onMouseOut={this.handleMouserOut.bind(this)} className={style.container}>
+            <div onMouseOut={this.handleMouserOut} className={style.container}>
                 <Menu
-                    onClick={this.handleClick.bind(this)}
+                    onClick={this.handleClick}
                     selectedKeys={[this.state.current]}
                     mode="horizontal"
                     className={style['menu']} 
@@ -63,18 +76,27 @@ export default class Menus extends Component{
                             </Menu.Item>
                         ))
                     }
+                    
                 </Menu>
-                <span className={style.button} onMouseOver={this.handleMouseOver.bind(this)}><Icon type={iconType} /></span>
-                
+                <span className={style.button} onMouseOver={this.handleMouseOver}><Icon type={iconType} /></span>                
             </div>
         )
     }
-    /*
-    componentDidMount() {
-        this.setState({
-            current:this.props.history.location.pathname.replace('\/','')||'首页'
-        })
-    }
-    */
-
 }
+
+function mapStateToProps(state){
+    return {
+        categories:state.admin.tags
+    }
+}
+
+function mapDispatchToProps(dispatch){
+    return {
+        get_all_tags:bindActionCreators(get_all_tags,dispatch)
+
+    }
+}
+
+
+
+export default Menus = connect(mapStateToProps,mapDispatchToProps)(Menus);
