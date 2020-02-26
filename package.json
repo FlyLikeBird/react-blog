@@ -37,7 +37,7 @@
     "http-proxy": "^1.16.2",
     "immutable": "^4.0.0-rc.12",
     "markdown": "^0.5.0",
-    "mongoose": "^4.11.11",
+    "mongoose": "^5.7.5",
     "multer": "^1.4.2",
     "prop-types": "^15.7.2",
     "qs": "^6.5.1",
