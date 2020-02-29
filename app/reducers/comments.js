@@ -17,7 +17,7 @@ export const actionTypes = {
     ADD_REPLY:'ADD_REPLY',
     RECEIVE_REPLY:'RECEIVE_REPLY',
     TOGGLE_REPLY:'TOGGLE_REPLY',
-    CHECK_USER_LOGIN:'CHECK_USER_LOGIN'
+    CLEAR_MOTION:'CLEAR_MOTION'
 };
 
 export const actions = { 
@@ -55,7 +55,6 @@ export const actions = {
         return {
             type:actionTypes.ADD_REPLY,
             data
-
         }
     },
     toggle_reply:function(pageNum, commentid){
@@ -70,16 +69,19 @@ export const actions = {
 function byId(state, action){
     switch(action.type){
         case actionTypes.OPERATE_COMMENT_RESULT:
-            var { data, operateType } = action;
-            var option = operateType === 'like' ? 'isLiked' : 'isDisliked';
-            if (state[option]){
+            var { data, operateType, isCancel } = action;
+            if (isCancel){
                 // 取消点赞、反对状态
-                state[operateType+'Users'].pop();
-                state[option] = !state[option]
+                state[operateType+'Users'] = state[operateType+'Users'].filter(item=>item.user._id != data.user._id);
             } else {
+                //  将当前用户的操作保存起来
                 state[operateType+'Users'].push(data);
-                state[option] = !state[option];
             } 
+            operateType === 'like' ? state.likeMotion = true : state.dislikeMotion = true ;
+            return {...state};
+        case actionTypes.CLEAR_MOTION:
+            state.likeMotion = false;
+            state.dislikeMotion = false;
             return {...state};
         case actionTypes.OPEN_REPLY:
             state.visible = !state.visible;
@@ -106,23 +108,17 @@ function byReply(state, action){
         subComments,
     }
 */
-function checkComments(comments, user){
+function checkComments(comments){
     return comments.map(item=>{
-            item.isLiked = item.likeUsers.map(item=>item.user._id).includes(user) ? true : false;
-            item.isDisliked = item.dislikeUsers.map(item=>item.user._id).includes(user) ? true : false;
-            item.replyObj = reduceReply(item.replies, user);
-            return { ...item };
+            item.replyObj = reduceReply(item.replies);
+            return item;
         })
 }
 
-function reduceReply(state, user, pageNum=1){
+function reduceReply(state, pageNum=1){
     var startIndex = ( pageNum - 1) *5;
     var endIndex = 5 * pageNum ;
-    var subComments = state.slice(startIndex, endIndex).map(reply=>{
-        reply.isLiked = reply.likeUsers.map(item=>item.user._id).includes(user) ? true : false;
-        reply.isDisliked = reply.dislikeUsers.map(item=>item.user._id).includes(user) ? true : false;
-        return reply;
-    })
+    var subComments = state.slice(startIndex, endIndex);
     return {
         total:state.length,
         pageNum,
@@ -133,14 +129,9 @@ function reduceReply(state, user, pageNum=1){
 export default function comments(state=initialState,action){
     //console.log(action);
     switch(action.type){  
-        case actionTypes.CHECK_USER_LOGIN:
-            return {
-                ...state,
-                data:checkComments(state.data, action.user)
-            };
         case actionTypes.RECEIVE_COMMENTS:
-            var { data, user } = action;
-            var comments = checkComments(data.comments, user);
+            var { data } = action;
+            var comments = checkComments(data.comments);
             return {
                 ...state,
                 data:comments,
@@ -168,6 +159,25 @@ export default function comments(state=initialState,action){
                     })
                 }
             }
+        case actionTypes.CLEAR_MOTION:
+            var { commentid, parentcommentid } = action;
+            if (parentcommentid){
+                return {
+                    ...state,
+                    data:state.data.map(item=>{
+                        if(item._id === parentcommentid) return byReply(item,action);                                                      
+                        return item;
+                    })
+                }
+            } else {
+                return {
+                    ...state,
+                    data:state.data.map(item=>{
+                        if (item._id === commentid ) return byId(item, action);
+                        return item;
+                    })
+                }
+            }
         case actionTypes.OPEN_REPLY:
             var { commentid, parentcommentid } = action;
             if (parentcommentid){
@@ -188,13 +198,13 @@ export default function comments(state=initialState,action){
                 }
             }
         case actionTypes.RECEIVE_REPLY:
-            var { data, user, commentid } = action;
+            var { data, commentid } = action;
             return {
                 ...state,
                 data:state.data.map(item=>{
                     if (item._id ===commentid) {
                         item.replies = item.replies.concat(data);
-                        item.replyObj = reduceReply(item.replies, user, item.replyObj.pageNum);
+                        item.replyObj = reduceReply(item.replies, item.replyObj.pageNum);
                         return { ...item };
                     }
                     return item;
@@ -202,12 +212,12 @@ export default function comments(state=initialState,action){
                 
             }
         case actionTypes.TOGGLE_REPLY:
-            var { commentid, user, pageNum } = action;
+            var { commentid, pageNum } = action;
             return {
                 ...state,
                 data:state.data.map(item=>{
                     if (item._id === commentid) {
-                        item.replyObj = reduceReply(item.replies, user, pageNum);
+                        item.replyObj = reduceReply(item.replies, pageNum);
                         return {...item}
                     }
                     return item;

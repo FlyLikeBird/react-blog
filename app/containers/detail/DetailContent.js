@@ -4,35 +4,28 @@ import {bindActionCreators} from 'redux'
 import { Icon } from 'antd'
 import remark from 'remark'
 import {connect} from 'react-redux'
-import {actions} from "../../reducers/frontReducer";
 import reactRenderer from 'remark-react'
-import style from './style.css'
-import { Loading } from '../components/loading/Loading';
-import DetailAction from './components/detail-action';
-import CommentContainer from './comment-container';
-const {get_article_detail} = actions;
+import style from './detail.style.css'
 
-class DetailContent extends PureComponent{
-    constructor(props){
-        super(props);
-    }
+export default class DetailContent extends PureComponent{
 
     render(){
-        const { data } = this.props;
-        const { content,title,author,viewcount,commentcount, newstime } = data;
+        const { data, commentsNum } = this.props;
+        const { content, title, auth, viewcount, newstime } = data;
         console.log('detailContent render()...');
         return(            
             <div className={style.container}>
                 <h2>{title}</h2>
                 <div className={style.articleInfo}>
-                    <span >
-                        <img className={style.authorImg} src={require('./author.png')}/> {author}
+                    <span>
+                        <span className={style['img-container']}><img src={auth.userImage}/></span>
+                        <span>{auth.username}</span>
                     </span>
                     <span>
-                        <Icon type="eye"/>{newstime}
+                        <Icon type="calendar" />{newstime}
                     </span>
                     <span>
-                        <Icon type="eye"/>{commentcount}
+                        <Icon type="edit"/>{commentsNum}
                     </span>
                     <span>
                         <Icon type="eye"/>{viewcount}
@@ -46,25 +39,4 @@ class DetailContent extends PureComponent{
         )
     }
 
-    componentDidMount() {
-        this.props.get_article_detail(this.props.uniquekey);
-    }
 }
-
-
-function mapStateToProps(state){
-    return {
-        data:state.front.article.articleDetail
-    }
-}
-
-function mapDispatchToProps(dispatch) {
-    return{
-        get_article_detail:bindActionCreators(get_article_detail,dispatch)
-    }
-}
-
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(DetailContent);

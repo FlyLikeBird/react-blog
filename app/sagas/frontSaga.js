@@ -28,26 +28,24 @@ export function* getArticlesListFlow () {
 }
 
 function* getArticleDetail (id) {
-    //yield put({type: IndexActionTypes.FETCH_START});
+    yield put({type: IndexActionTypes.FETCH_START});
     try {
         return yield call(get, `/getArticleDetail?id=${id}`);
     } catch (err) {
         yield put({type: IndexActionTypes.SET_MESSAGE, msgContent: '网络请求错误', msgType: 0});
     } finally {
-        //yield put({type: IndexActionTypes.FETCH_END})
+        yield put({type: IndexActionTypes.FETCH_END})
     }
 }
 
 function* getArticleDetailFlow () {
     while (true){
-        let req = yield take(FrontActionTypes.GET_ARTICLE_DETAIL);
+        let req = yield take([FrontActionTypes.GET_ARTICLE_DETAIL,FrontActionTypes.RELOAD_ARTICLE_DETAIL]);
         let res = yield call(getArticleDetail,req.id);
-        if(res){
-            if(res.code === 1){
-                yield put({type: FrontActionTypes.RESPONSE_ARTICLE_DETAIL,data:res.data});
-            }else{
-                yield put({type: IndexActionTypes.SET_MESSAGE, msgContent: res.message, msgType: 0});
-            }
+        if(res && res.code === 1){
+            yield put({type: FrontActionTypes.RESPONSE_ARTICLE_DETAIL,data:res.data});
+        } else{
+            yield put({type: IndexActionTypes.SET_MESSAGE, msgContent: res.message, msgType: 0});           
         }
     }
 }

@@ -34,7 +34,6 @@ class Home extends Component {
                         :
                         <div>
                             <ArticleList
-                                history={this.props.history}
                                 data={this.props.articleList}
                             />
                             <div className={style.paginationContainer}>

@@ -3,22 +3,22 @@ import { Button, Icon, Popover } from 'antd';
 import style from './comment-item.style.css';
 import { parseDate, formatDate } from '../../../../util';
 import UserList from '../user-list';
-import CommentInput from '../comment-input'
-import CommentList from '../comment-list'
 
 export default class CommentButton extends PureComponent{
 
     render(){
-        console.log('commentbutton render()...');
-        var { data, parentcommentid, onLikeAndDislike, onOpenReply } = this.props;
-        var { _id, likeUsers, isSub, dislikeUsers, isLiked, isDisliked, replyObj } = data;
+        //console.log('commentbutton render()...');
+        var { data, user, parentcommentid, onLikeAndDislike, onOpenReply } = this.props;
+        var { _id, likeUsers, isSub, dislikeUsers, replyObj, likeMotion, dislikeMotion } = data;
         
+        var isLiked = likeUsers.map(item=>item.user._id).includes(user) ? true : false;
+        var isDisliked = dislikeUsers.map(item=>item.user._id).includes(user) ? true : false ;
         return(
             
             <div className={style['button-container']}>
                 <span>
                     <span className={style.text} onClick={ ()=>onLikeAndDislike( _id, 'like', isLiked==true ? 'true':'', parentcommentid)}>
-                        <Icon type="like"  style={{color:isLiked ? '#108ee9' : 'rgba(0, 0, 0, 0.65)'}}/>
+                        <Icon className={ likeMotion ? style.motion : ''} type="like"  style={{color:isLiked ? '#108ee9' : 'rgba(0, 0, 0, 0.65)'}}/>
                         <span>{ isLiked ? `取消赞成${likeUsers.length}` : `赞成${likeUsers.length}`}</span>
                     </span>
                     <Popover content={<UserList data={likeUsers} text="赞"/>}>
@@ -27,7 +27,7 @@ export default class CommentButton extends PureComponent{
                 </span>
                 <span>
                     <span className={style.text} onClick={ ()=>onLikeAndDislike(_id, 'dislike', isDisliked==true ? 'true':'', parentcommentid)}>
-                        <Icon type="dislike"  style={{color:isDisliked ? '#108ee9' : 'rgba(0, 0, 0, 0.65)'}}/>
+                        <Icon className={ dislikeMotion ? style.motion :''} type="dislike"  style={{color:isDisliked ? '#108ee9' : 'rgba(0, 0, 0, 0.65)'}}/>
                         <span>{ isDisliked ? `取消反对${dislikeUsers.length}` : `反对${dislikeUsers.length}`}</span>
                     </span>
                     <Popover content={<UserList data={dislikeUsers} text="踩"/>}>

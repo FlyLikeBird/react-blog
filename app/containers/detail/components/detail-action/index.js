@@ -5,11 +5,11 @@ import style from './detail-action.style.css';
 export default class DetailAction extends Component{
 
     render(){
-        const {articleContent,title,author,viewcount,commentcount, newstime} = this.props;
-    
+        const { onModalVisible } = this.props;
+        
         return(
             <div className={style.container}>
-                <Button type="primary" shape="circle" icon="star" />
+                <Button type="primary" shape="circle" icon="star" onClick={()=>onModalVisible(true)}/>
                 <Button type="primary" shape="circle" icon="eye" />
             </div>
         )

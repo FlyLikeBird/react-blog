@@ -10,6 +10,7 @@ const router = Express.Router();
 
 router.use('/user', require('./user'));
 router.use('/comment',require('./comment'));
+router.use('/collect', require('./collect'));
 //获取全部标签
 router.get('/getAllTags', function (req, res) {
     Tag.find(null).then(tags=> {
@@ -74,6 +75,7 @@ router.get('/getArticleDetail', (req, res) => {
     Article.updateOne({_id},{$inc:{viewcount:1}},(err,result)=>{
         Article.findOne({_id})
           .populate({path:'tags', select:'tag'})
+          .populate({path:'auth', select:'username userImage'})
           .then(doc=>{
               responseClient(res, 200, 1, 'ok', doc);
           })

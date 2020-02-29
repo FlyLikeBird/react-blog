@@ -44,9 +44,6 @@ export function* loginFlow() {
         if(response&&response.code === 1){        
             yield put({type:IndexActionTypes.SET_MESSAGE,msgContent:'登录成功!',msgType:1});
             yield put({type:IndexActionTypes.RESPONSE_USER_INFO,data:response.data});
-            var state = yield select();
-            var user = state.globalState.userInfo.userId;
-            yield put({type:CommentActionTypes.CHECK_USER_LOGIN, user});
         }
     }
 }

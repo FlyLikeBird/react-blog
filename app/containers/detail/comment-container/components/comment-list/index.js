@@ -4,7 +4,7 @@ import CommentItem from '../comment-item';
 import style from './comment-list.style.css';
 export default class CommentList extends PureComponent{
     render(){
-        const { uniquekey, comments, parentcommentid, onOpenReply, onToggleReply, onAddReply, onLikeAndDislike } = this.props;
+        const { uniquekey, user, comments, parentcommentid, onOpenReply, onToggleReply, onAddReply, onLikeAndDislike } = this.props;
         console.log('commentlist render()...');
         return(
             
@@ -14,6 +14,7 @@ export default class CommentList extends PureComponent{
                         <CommentItem
                             data={item} 
                             key={item._id}
+                            user={user}
                             parentcommentid={parentcommentid} 
                             uniquekey={uniquekey} 
                             onLikeAndDislike={onLikeAndDislike} 

@@ -6,7 +6,7 @@ import CommentItem from './index';
 export default class SubComment extends PureComponent{
 
     shouldComponentUpdate(nextProps){
-        if (this.props.data != nextProps.data){
+        if (this.props.data != nextProps.data || this.props.user != nextProps.user){
             return true;
         } else {
             return false;
@@ -14,10 +14,9 @@ export default class SubComment extends PureComponent{
     }
 
     render(){
-        console.log('subCommentList render()...');
-        var { data, onAddReply, parentcommentid, uniquekey, onOpenReply, onToggleReply, onLikeAndDislike } = this.props;
+        //console.log('subCommentList render()...');
+        var { data, user, onAddReply, parentcommentid, uniquekey, onOpenReply, onToggleReply, onLikeAndDislike } = this.props;
         var { subComments, pageNum, total } = data;
-        console.log(subComments);
         return(           
             <div className={style['sub-container']}>               
                 {
@@ -25,6 +24,7 @@ export default class SubComment extends PureComponent{
                         <CommentItem
                             data={item}
                             key={item._id}
+                            user={user}
                             parentcommentid={parentcommentid} 
                             uniquekey={uniquekey} 
                             onLikeAndDislike={onLikeAndDislike} 

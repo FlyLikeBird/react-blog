@@ -1,3 +1,4 @@
+import { delay } from 'redux-saga'
 import {take,put,call, fork, select} from 'redux-saga/effects'
 import {get, post} from '../fetch/fetch'
 import {actionsTypes as IndexActionTypes} from '../reducers'
@@ -23,8 +24,12 @@ function* operateCommentFlow(){
             var { commentid, action, isCancel, parentcommentid } = req;
             var res = yield call(operateComment, commentid, user, action, isCancel );
             if ( res && res.code === 1){
-                var data = { user:state.globalState.userInfo, date:new Date().toString()};
-                yield put({type:CommentActionTypes.OPERATE_COMMENT_RESULT, data, commentid, operateType:action, parentcommentid});
+                var userInfo = state.globalState.userInfo;
+                var { username, userImage, userId } = userInfo;
+                var data = { user:{_id:userId, username, userImage}, date:new Date().toString()};
+                yield put({type:CommentActionTypes.OPERATE_COMMENT_RESULT, data, commentid, isCancel, operateType:action, parentcommentid});
+                yield call(delay, 500);
+                yield put({type:CommentActionTypes.CLEAR_MOTION, commentid, parentcommentid});
             } else {
                 yield put({type:IndexActionTypes.SET_MESSAGE, msgContent:res.message, msgType:0});
             }

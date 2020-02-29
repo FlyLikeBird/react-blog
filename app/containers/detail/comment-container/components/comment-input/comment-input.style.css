@@ -2,6 +2,10 @@
     
 }
 
-.container .ant-form-item {
+.container .item {
     margin-bottom:10px;
+}
+
+.container .images>div:last-child {
+    margin:0;
 }

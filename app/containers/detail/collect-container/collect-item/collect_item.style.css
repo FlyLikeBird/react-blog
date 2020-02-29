@@ -1,0 +1,143 @@
+/*
+
+    收藏夹样式
+*/
+.container {
+    border-bottom:1px solid #e8e8e8;
+    font-size:12px;
+    padding:10px;
+
+}
+
+.container .header {
+    display:flex;
+    align-items:center;
+    cursor:pointer;
+}
+
+.container .header .card {
+    flex:1;
+    display: inline-flex;
+    align-items: center;
+    margin-left: 20px;
+}
+
+.container .header .card i{
+    transition:all 0.3s; 
+}
+
+.container .header .card i.addFlash{
+    animation:iconAction 0.5s ease-out;
+}
+
+
+.card .icon-container {
+    position:relative;
+    margin-right:10px;
+}
+.header .content {
+    flex:1;
+}
+
+.header .title {
+    color:#000;
+    font-weight:500
+}
+
+.header .text {
+    display:inline-block;
+    transform-origin: left;
+    transform:scale(0.8);
+}
+
+.container .header .motion {
+    width:300px;
+    position:absolute;
+    margin-left:-10px;
+    opacity: 0;
+    transform-origin: left;
+    color: #1890ff;
+    font-size: 24px;
+}
+
+.container .header .motion i{
+    float:right;
+}
+
+.container .header .motion.rollIn{
+    animation: rollIn 0.5s cubic-bezier(.645,.045,.355,1);
+}
+
+.container .header .motion.rollOut {
+    animation: rollOut 0.5s cubic-bezier(.645,.045,.355,1);
+}
+
+
+.container .header .text {
+    display:inline-block;
+    transform:scale(0.8);
+    transform-origin: left;
+}
+
+.container .header .dot {
+    display:inline-block;
+    margin:0 4px;
+}
+
+.container .button {
+    border:none;
+    transform: scale(0.8);
+    color: #fff;
+}
+
+.container .button.remove {
+    background-color:#ccc;
+}
+
+.container .button.add {
+    background-color:#108ee9;
+}
+
+.container .add-motion {
+    animation:collectAction 0.5s ease-in;
+}
+
+.ant-select-dropdown-menu-item.float {
+    float:left;
+    width:20%;
+}
+
+.form {
+    display:flex;
+    align-items: center;
+}
+
+@keyframes rollIn {
+    0% {
+        opacity: 1;
+        transform:translateX(-300px) rotate(-90deg);
+    }
+    
+    90%{
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform:translateX(-300px) rotate(0deg);
+    }
+}
+
+@keyframes rollOut {
+    0% {
+        opacity: 1;
+        transform:translateX(-300px) rotate(0deg);
+    }
+    
+    90%{
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform:translateX(-300px) rotate(-90deg);
+    }
+}

@@ -21,7 +21,8 @@ class CommentContainer extends PureComponent{
             <div>
                 <CommentInput onAddComment={add_comment} uniquekey={uniquekey}/>
                 <CommentList 
-                    comments={data}                   
+                    comments={data} 
+                    user={user}                  
                     onOpenReply={open_reply}
                     onAddReply={add_reply}
                     onToggleReply={toggle_reply} 
@@ -53,12 +54,13 @@ CommentContainer.propTypes = {
 }
 
 function mapStateToProps(state) {
-    console.log(state);
+    //console.log(state);
     var { data, pageNum, total } = state.front.comments;
     return {
         data,
         pageNum,
-        total
+        total,
+        user:state.globalState.userInfo.userId
     }
 }
 

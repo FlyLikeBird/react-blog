@@ -42,8 +42,7 @@ class CommentInput extends PureComponent{
 
     }
 
-    checkComments(rule,value,callback){ 
-      console.log(value);    
+    checkComments(rule,value,callback){  
       if (value && value.match(/^\s+$/)){
         callback('请输入正常的评论内容！');
       } else {
@@ -117,7 +116,7 @@ class CommentInput extends PureComponent{
         return(
                    
                 <Form className={style.container} onSubmit={this.handleSubmit.bind(this)} >
-                    <FormItem>
+                    <FormItem className={style.item}>
                         {getFieldDecorator('comments',{
                             rules:[{
                                 required:true,
@@ -129,11 +128,11 @@ class CommentInput extends PureComponent{
                           <TextArea rows={3} placeholder="发表你的看法吧~" />
                         )}
                     </FormItem>
-                    <FormItem>
+                    <FormItem className={style.item}>
                             {
                                 getFieldDecorator('images')(
                                     <Upload
-                                       className="user"      
+                                       className={style.images}      
                                        listType="picture-card"                                      
                                        fileList={fileList}
                                        beforeUpload={this.handleBeforeUpload.bind(this)}
@@ -146,10 +145,7 @@ class CommentInput extends PureComponent{
                             }
                     </FormItem>
                     <Button type="primary" htmlType="submit">评论</Button>
-                </Form>
-                              
-                          
-            
+                </Form>                          
         )
         
     }

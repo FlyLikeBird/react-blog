@@ -7,7 +7,7 @@ var Schema = mongoose.Schema;
 
 module.exports = new mongoose.Schema({
     newstime:String,
-    auth:String,
+    auth:{type:Schema.Types.ObjectId, ref:'User'},
     title:String,
     content:String,
     thumbnails:[String],
