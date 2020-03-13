@@ -1,9 +1,9 @@
 import React,{Component} from 'react'
 import { Button, Icon, Popover } from 'antd';
-import style from './user-list.style.css';
+import style from './info-list.style.css';
 import { parseDate, formatDate } from '../../../../util';
 
-export default class UserList extends Component{
+export default class InfoList extends Component{
     
     render(){
         var { data, text } = this.props;

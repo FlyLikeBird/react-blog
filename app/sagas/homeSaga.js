@@ -60,7 +60,6 @@ export function* registerFlow () {
         let request = yield take(IndexActionTypes.USER_REGISTER);
         let response = yield call(register, request.data);
         if(response&&response.code === 1){
-
             yield put({type:IndexActionTypes.SET_MESSAGE,msgContent:'注册成功!',msgType:1});
             yield put({type:IndexActionTypes.RESPONSE_USER_INFO,data:response.data})
         } else {

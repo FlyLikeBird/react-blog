@@ -5,6 +5,7 @@ import httpProxy from 'http-proxy'
 import compression from 'compression'
 import connectHistoryApiFallback from 'connect-history-api-fallback'
 import config from '../config/config'
+import reload from 'reload'
 
 const app = new Express();
 const port = config.port;
@@ -23,7 +24,6 @@ app.use('/api',(req,res)=>{
 app.use('/', connectHistoryApiFallback());
 app.use('/',Express.static(path.join(__dirname,"..",'build')));
 app.use('/',Express.static(path.join(__dirname,"..",'static')));
-
 
 app.use(compression());
 app.use(favicon(path.join(__dirname,'..','static','favicon.ico')));
@@ -44,6 +44,8 @@ if(process.env.NODE_ENV!=='production'){
     }));
     app.use(WebpackHotMiddleware(compiler));
 }
+
+reload(app);
 
 app.listen(port,(err)=>{
     if(err){

@@ -29,7 +29,7 @@ class Admin extends Component {
 
     render() {
         const {url} = this.props.match;
-        if(this.props.userInfo&&this.props.userInfo.userType){
+        
             return (
                 <div>
                     {
@@ -52,14 +52,12 @@ class Admin extends Component {
                                         <Route component={NotFound}/>
                                     </Switch>
                                 </div>
-                            </div> :
+                            </div> 
+                            :
                             <Redirect to='/'/>
                     }
                 </div>
             )
-        }else{
-            return <NotFound/>
-        }
     }
     componentWillReceiveProps() {
         this.props.change_location_admin(window.location.pathname.replace(/\/admin/, "")||'/');

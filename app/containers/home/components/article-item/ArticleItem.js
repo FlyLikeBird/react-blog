@@ -1,11 +1,12 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { Icon } from 'antd'
+import { parseDate, formatDate } from '../../../util';
 import style from './articleItem.style.css'
 
 export const ArticleItem = (props)=>{
     var { data } = props;
-    var { _id, thumbnails, title, tags, content, time, viewcount, comments } = data;
+    var { _id, thumbnails, title, tags, content, newstime, viewcount, comments } = data;
     return (<Link to={`/detail/${_id}`}>
         <div className={style.container}>
             <div className={style['img-container']} style={{backgroundImage:`url(${thumbnails[0]})`}}>
@@ -26,9 +27,9 @@ export const ArticleItem = (props)=>{
                 </div>
                 <div className={style['data-container']}>          
                     <span>
-                        <Icon type="eye"/>
+                        <Icon type="calendar" />
                         时间:
-                        {time}
+                        {formatDate(parseDate(newstime))}
                     </span>
                     <span>
                         <Icon type="eye"/>
@@ -36,7 +37,7 @@ export const ArticleItem = (props)=>{
                         {viewcount}
                     </span>
                     <span>
-                        <Icon type="eye"/>
+                        <Icon type="read" />
                         评论数:
                         {comments}
                     </span>

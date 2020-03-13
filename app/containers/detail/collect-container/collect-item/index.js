@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react';
 import { Row, Col, BackTop, Button, Icon, Tooltip, Popover, Modal, Input, Form, Select, Card, Collapse } from 'antd';
 import { parseDate, formatDate, translateType, formatContent } from '../../../util';
 import style from './collect_item.style.css'
-import UserList from '../../comment-container/components/user-list'
+import InfoList from '../../comment-container/components/info-list'
 import ContentItem from '../content-item/ContentItem';
 
 const { Option } = Select;
@@ -55,7 +55,7 @@ export default class CollectItem extends PureComponent {
                                         ?
                                         null
                                         :                                       
-                                        <Popover content={<UserList data={followedBy} text="收藏" />}>
+                                        <Popover content={<InfoList data={followedBy} text="收藏" />}>
                                             <span className={style.text}>{`${followedBy?followedBy.length:0}人收藏`}<Icon type="caret-left" /></span>                                            
                                         </Popover>
                                         

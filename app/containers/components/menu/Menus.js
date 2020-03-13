@@ -1,102 +1,70 @@
 import React,{ PureComponent} from 'react'
-import { connect } from 'react-redux'
-import { bindActionCreators } from 'redux'
+import { Link } from 'react-router-dom'
 import {Menu, Icon} from 'antd'
 import style from './menu.style.css'
-import { actions } from '../../../reducers/adminManagerTags';
 
-const { get_all_tags } = actions;
-
-class Menus extends PureComponent{
+export default class Menus extends PureComponent{
     constructor(props){
         super(props);
-        this.handleClick = this.handleClick.bind(this);
-        this.handleMouserOut = this.handleMouserOut.bind(this);
         this.handleMouseOver = this.handleMouseOver.bind(this);
-        this.state = {
-            current:'首页',
-            open:false,
-            iconType:'caret-down'
-        }
+        this.handleMouserOut = this.handleMouserOut.bind(this);
     }
-
-    handleClick(e){
-        var current = e.key;
-        if(current === '首页'){
-            this.props.getArticleList('');
-        }else{
-            this.props.getArticleList(current);
-        }
-        let toPath = current === '首页'?'/':'/tag/'+current;
-        this.setState({
-            current: current,
-        });
-        this.props.history.push(toPath);
-    }
-
-    handleMouseOver(e){        
-        this.setState({open:true, iconType:'caret-up'});  
+    
+    handleMouseOver(e){  
+        if (!this.props.menuVisible) {
+            this.props.toggle_menu_visible(true);
+        }                 
     }
 
     handleMouserOut(e){
         var target = e.currentTarget;
         var other = e.toElement || e.relatedTarget;
         if (!target.contains(other)){
-            this.setState({open:false, iconType:'caret-down'});
+            this.props.toggle_menu_visible(false);
         }  
     }
-
+    
     componentDidMount(){
         this.props.get_all_tags();
     }
 
+    
     render(){
-        var { categories } = this.props;
-        var { iconType, open } = this.state;
+        var { categories, currentTag, menuVisible } = this.props;
+        var iconType = menuVisible ? 'caret-up' : 'caret-down';
+        // 判断当前tag所在的行数
+        var index = categories.map(item=>item._id).indexOf(currentTag) 
+        var line = index == -1 ? 0 : Math.floor(index/10);
         return(
-            <div onMouseOut={this.handleMouserOut} className={style.container}>
+            <div onMouseOver={this.handleMouseOver} onMouseOut={this.handleMouserOut} className={style.container}>
                 <Menu
-                    onClick={this.handleClick}
-                    selectedKeys={[this.state.current]}
+                    //onClick={this.handleClick}
+                    
+                    selectedKeys={[currentTag]}
                     mode="horizontal"
-                    className={style['menu']} 
+                    className={`self-menu ${style.menu}`}
                 >
                     {
-                        open
+                        menuVisible
                         ?
-                        this.props.categories.map((item,index)=>(
+                        categories.map((item,index)=>(
                             <Menu.Item key={item._id ? item._id : '首页'}>
-                                <span className={style['item']}><span>{item.tag}</span><span className={style.num}>{item.content > 99 ? '99+' : item.content}</span></span>
+                                <Link to={item._id?`/tag/${item._id}`:'/'}><span className={style['item']}><span>{item.tag}</span><span className={style.num}>{item.content > 99 ? '99+' : item.content}</span></span></Link>
                             </Menu.Item>
                         ))
                         :
-                        this.props.categories.slice(0,10).map((item,index)=>(
+                        categories.slice(line*10,line*10+10).map((item,index)=>(
                             <Menu.Item key={item._id ? item._id : '首页'}>
-                                <span className={style['item']}><span>{item.tag}</span><span className={style.num}>{item.content > 99 ? '99+' : item.content}</span></span>
+                                <Link to={item._id?`/tag/${item._id}`:'/'}><span className={style['item']}><span>{item.tag}</span><span className={style.num}>{item.content > 99 ? '99+' : item.content}</span></span></Link>
                             </Menu.Item>
                         ))
                     }
                     
                 </Menu>
-                <span className={style.button} onMouseOver={this.handleMouseOver}><Icon type={iconType} /></span>                
+                <span className={style.button}><Icon type={iconType} /></span>                
             </div>
         )
     }
 }
 
-function mapStateToProps(state){
-    return {
-        categories:state.admin.tags
-    }
-}
 
-function mapDispatchToProps(dispatch){
-    return {
-        get_all_tags:bindActionCreators(get_all_tags,dispatch)
-
-    }
-}
-
-
-
-export default Menus = connect(mapStateToProps,mapDispatchToProps)(Menus);

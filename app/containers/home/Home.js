@@ -1,5 +1,5 @@
-import React, {Component, PropTypes} from 'react'
-import PureRenderMixin from 'react-addons-pure-render-mixin'
+import React, {PureComponent} from 'react'
+import PropTypes from 'prop-types'
 import BaseComponent from '../BaseComponent'
 import {
     Redirect
@@ -13,19 +13,15 @@ import {bindActionCreators} from 'redux'
 import {actions as frontActions} from '../../reducers/frontReducer'
 const {get_article_list } = frontActions;
 
-class Home extends Component {
-    constructor(props) {
-        super(props); 
-    }
-
+class Home extends PureComponent {
     render() {
-        const { tags, isFetching } = this.props;
+        const { tags, articleList } = this.props;
+        const { pageNum, total, data, isFetching } = articleList;
         console.log('home render()...');
         return (
-            tags.length > 1 && this.props.match.params.tag && (tags.indexOf(this.props.match.params.tag) === -1 || this.props.location.pathname.lastIndexOf('\/') > 0)
+            //  当首页或者存在的标签页时才渲染，否则404
+            this.props.location.pathname === '/' || ( this.props.match.params.id && tags.map(item=>item._id).indexOf(this.props.match.params.id) ) 
                 ?
-                <Redirect to='/404'/>
-                :
                 <div className={style.container}>
                     {
                         isFetching
@@ -34,7 +30,7 @@ class Home extends Component {
                         :
                         <div>
                             <ArticleList
-                                data={this.props.articleList}
+                                data={data}
                             />
                             <div className={style.paginationContainer}>
                                 <Pagination
@@ -42,40 +38,38 @@ class Home extends Component {
                                     onChange={(pageNum) => {
                                         this.props.get_article_list(this.props.match.params.id || '', pageNum);
                                     }}
-                                    current={this.props.pageNum}
-                                    total={this.props.total}/>
+                                    current={pageNum}
+                                    total={total}/>
                             </div>
                         </div>
                     }                    
                 </div>
+                :
+                <Redirect to='/404'/>          
         )
     }
 
+    componentWillReceiveProps(nextProps){
+        if (this.props.match.params.id != nextProps.match.params.id){
+            this.props.get_article_list(nextProps.match.params.id || '');
+        }
+    }
+
     componentDidMount() {
-        this.props.get_article_list(this.props.match.params.tag || '');
+        this.props.get_article_list(this.props.match.params.id || '');
     }
 }
 
-Home.defaultProps = {
-    userInfo: {},
-    pageNum: 1,
-    total: 0,
-    articleList: []
-};
-
-Home.propsTypes = {
-    pageNum: PropTypes.number.isRequired,
-    total: PropTypes.number.isRequired,
-    articleList: PropTypes.array.isRequired
+Home.propTypes = {
+    tags:PropTypes.array.isRequired,
+    articleList: PropTypes.object.isRequired,
+    get_article_list:PropTypes.func.isRequired
 };
 
 function mapStateToProps(state) {
     return {
-        isFetching:state.front.article.isFetching,
-        tags: state.admin.tags,
-        pageNum: state.front.article.pageNum,
-        total: state.front.article.total,
-        articleList: state.front.article.articleList,
+        tags:state.admin.tags,
+        articleList: state.front.article.articleList
     }
 }
 

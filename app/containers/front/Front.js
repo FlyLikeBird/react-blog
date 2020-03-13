@@ -18,36 +18,34 @@ import {actions as FrontActions} from '../../reducers/frontReducer'
 import Login from "../home/components/login/Login";
 import {Logined} from "../home/components/logined/Logined";
 import {actions as IndexActions} from '../../reducers/index'
+import { actions as AdminActions } from '../../reducers/adminManagerTags'
 import connectRoute from '../connectRoute';
 
-const {get_loginout} = actions;
-const {get_article_list} = FrontActions;
+const { get_loginout } = actions;
+const { toggle_menu_visible } = FrontActions;
+const { get_all_tags } = AdminActions;
 
 const HomeWrapped = connectRoute(Home);
 const DetailWrapped = connectRoute(Detail);
 
 class Front extends PureComponent{
-    constructor(props){
-        super(props);
-    }
 
     render(){
-        const {login, register, loginOut, userInfo } = this.props;
+        const { history, login, register, loginOut, userInfo, currentTag, menuVisible, categories, get_all_tags, toggle_menu_visible } = this.props;
         console.log('front render()...');
         return(
             <div>
                 <div>
                     <Banner/>
-                    <Menus/>
+                    <Menus currentTag={currentTag} menuVisible={menuVisible} categories={categories} get_all_tags={get_all_tags}  toggle_menu_visible={toggle_menu_visible}/>
                 </div>
                 <div className={style.container}>
                     <div className={style.contentContainer}>
                         <div className={style.content}>                            
                             <Switch>
-                                <Route exact path="/" component={HomeWrapped}/>
                                 <Route exact path="/detail/:id" component={DetailWrapped}/>                                
                                 <Route exact path="/tag/:id" component={HomeWrapped}/>
-                                <Route component={NotFound}/>
+                                <Route path="/" component={HomeWrapped}/>
                             </Switch>                           
                         </div>
                         <div className={`${style.loginContainer}`}>
@@ -60,17 +58,34 @@ class Front extends PureComponent{
             </div>
         )
     }
+
+}
+
+Front.propTypes = {
+    userInfo:PropTypes.object.isRequired,
+    categories:PropTypes.array.isRequired,
+    currentTag:PropTypes.string.isRequired,
+    menuVisible:PropTypes.bool.isRequired,
+    login:PropTypes.func.isRequired,
+    register:PropTypes.func.isRequired,
+    loginOut:PropTypes.func.isRequired,
+    get_all_tags:PropTypes.func.isRequired,
+    toggle_menu_visible:PropTypes.func.isRequired
 }
 
 function mapStateToProps(state) {
     return {
-        userInfo: state.globalState.userInfo
+        userInfo: state.globalState.userInfo,
+        categories:state.admin.tags,
+        currentTag:state.front.article.currentTag,
+        menuVisible:state.front.article.menuVisible
     }
 }
 
 function mapDispatchToProps(dispatch) {
     return{
-        get_article_list:bindActionCreators(get_article_list,dispatch),
+        get_all_tags:bindActionCreators(get_all_tags,dispatch),
+        toggle_menu_visible:bindActionCreators(toggle_menu_visible, dispatch),
         login: bindActionCreators(IndexActions.get_login, dispatch),
         register: bindActionCreators(IndexActions.get_register, dispatch),
         loginOut:bindActionCreators(IndexActions.get_loginout, dispatch)

@@ -31,14 +31,15 @@ router.get('/getAllTags', function (req, res) {
 //获取文章
 router.get('/getArticles', function (req, res) {
     var { tag, isPublish, pageNum } = req.query;
+    isPublish = isPublish === 'true' ? true : false;
     var searchCondition ;
     searchCondition = tag ? 
         {
-            isPublish: isPublish==='true' ? true : false,
+            isPublish,
             tags:{$elemMatch:{$eq:tag}}
         }
         :
-        { isPublish: isPublish==='true' ? true : false }
+        { isPublish}
     let skip = (pageNum - 1) < 0 ? 0 : (pageNum - 1) * 10;
     let responseData = {
         total: 0,
@@ -48,22 +49,38 @@ router.get('/getArticles', function (req, res) {
     Article.count(searchCondition)
         .then(count => {
             responseData.total = count;
-            Article.find(searchCondition, '_id title isPublish author viewcount tags thumbnails content', {
+            Article.find(searchCondition, '_id title isPublish newstime comments author viewcount tags thumbnails content', {
                 skip: skip,
                 limit: 10
             })
             .populate({ path:'tags', select:'tag'})
-            .then(result => {
-                var data = result.map(item=>{
-                  item.content = selectContentByUniquekey(item.content);
-                  return item;
+            .then(articles => {
+                var promises = []
+                var data = articles.map(article=>{
+                    article.content = selectContentByUniquekey(article.content);
+                    var promise = new Promise((resolve,reject)=>{
+                      Comment.find({related:article._id},(err,comments)=>{
+                        resolve(comments.length);
+                      })
+                    })
+                    promises.push(promise);
+                    return article;
                 })
-                responseData.list = data;
-                responseClient(res, 200, 1, 'success', responseData);
-            }).cancel(err => {
-            throw err
+                
+                Promise.all(promises)
+                  .then((comments)=>{
+                      var list = data.map((article,index)=>{
+                        article.comments = comments[index];
+                        return article;
+                      });
+                      responseData.list = list;
+                      responseClient(res, 200, 1, 'ok', responseData);
+                  })
+                
+            }).catch(err => {
+              throw err
             })
-        }).cancel(err => {
+        }).catch(err => {
         responseClient(res);
     });
     
@@ -75,7 +92,7 @@ router.get('/getArticleDetail', (req, res) => {
     Article.updateOne({_id},{$inc:{viewcount:1}},(err,result)=>{
         Article.findOne({_id})
           .populate({path:'tags', select:'tag'})
-          .populate({path:'auth', select:'username userImage'})
+          .populate({path:'auth', select:'username userImage description level userFans'})
           .then(doc=>{
               responseClient(res, 200, 1, 'ok', doc);
           })

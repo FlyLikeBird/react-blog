@@ -1,25 +1,8 @@
 import axios from 'axios'
-import Qs from 'qs'
 
 let config = {
     baseURL: '/api',
-    
-    transformRequest: [
-        function (data) {
-            let ret = '';
-            for (let it in data) {
-                ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
-            }
-            return ret
-        }
-    ],
-    /*
-    transformResponse: [
-        function (data) {
-            return data
-        }
-    ],
-
+    /*   
     headers: {
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
     },
@@ -28,16 +11,10 @@ let config = {
     responseType: 'json'
 };
 
-axios.interceptors.response.use(function(res){
-    //相应拦截器
-    return res.data;
-});
-
-
 export function get(url) {
-    return axios.get(url, config);
+    return axios.get(url, config).then(response=>response.data);
 }
 
 export function post(url, data) {
-    return fetch(`/api${url}`,{method:'post',body:data}).then(response=>response.json());
+    return axios.post(url, data, config).then(response=>response.data);
 }

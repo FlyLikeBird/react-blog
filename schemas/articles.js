@@ -13,6 +13,7 @@ module.exports = new mongoose.Schema({
     thumbnails:[String],
     viewcount:{type:Number,default:100},
     tags:[{type:Schema.Types.ObjectId, ref:'Tag'}],
+    comments:{type:Number, default:0},
     rateUsers:[{
         user:{type:Schema.Types.ObjectId, ref:'User'},
         date:String,

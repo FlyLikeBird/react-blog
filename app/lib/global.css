@@ -1,0 +1,29 @@
+#root {
+    text-align:center;
+}
+
+
+/*  用户等级进度条样式 */
+.ant-progress .ant-progress-inner {
+     box-shadow: inset 2px 1px 2px rgba(0,0,0,.2);
+}
+
+/*  导航栏样式 */
+
+.self-menu.ant-menu li.ant-menu-item {
+    transition:none;
+}
+
+.self-menu.ant-menu li.ant-menu-item-selected {
+    background-color:rgba(24, 144, 255, 0.1);
+    border-bottom:none;
+}
+
+.self-menu.ant-menu li.ant-menu-item-selected span{
+    color:#108ee9;
+}
+
+.self-menu.ant-menu li.ant-menu-item-active {
+    background-color:rgba(24, 144, 255, 0.1);
+    border-bottom:none;
+}

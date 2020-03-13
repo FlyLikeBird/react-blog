@@ -21,13 +21,13 @@ import Admin from "./admin/Admin";
 import Front from './front/Front'
 import Usercenter from './usercenter/Usercenter';
 import animationStyle from '../lib/animate.css'
-import { Map, fromJS, is } from 'immutable';
 import connectRoute from './connectRoute'
-
+import '../lib/global.css'
 
 const NotFoundWrapped = connectRoute(NotFound);
 const AdminWrapped = connectRoute(Admin);
 const FrontWrapped = connectRoute(Front);
+const UsercenterWrapped = connectRoute(Usercenter);
 
 const {clear_msg, user_auth} = actions;
 
@@ -49,17 +49,16 @@ class AppIndex extends Component {
     };
 
     render() {
-        let {isFetching} = this.props;
+    
         return (
             <Router>
-                <div>
+                <div style={{textAlign:'center'}}>
                     <Switch>
                         <Route path='/404' component={NotFoundWrapped}/>
                         <Route path='/admin' component={AdminWrapped}/>
-                        <Route path="/" component={FrontWrapped}/>
-                        <Route path="/usercenter/:id" component={Usercenter} />
+                        <Route path="/usercenter/:id" component={UsercenterWrapped} />
+                        <Route path="/" component={FrontWrapped}/>                       
                     </Switch>
-                    { isFetching && <Loading /> }
                     {this.props.notification && this.props.notification.content ?
                         (this.props.notification.type === 1 ?
                             this.openNotification('success', this.props.notification.content) :
@@ -71,12 +70,15 @@ class AppIndex extends Component {
     }
 }
 
+AppIndex.propTypes = {
+    notification:PropTypes.object.isRequired,
+    clear_msg:PropTypes.func.isRequired
+}
 
 
 function mapStateToProps(state) {
     return {
         notification: state.globalState.msg,
-        isFetching: state.globalState.isFetching
     }
 }
 

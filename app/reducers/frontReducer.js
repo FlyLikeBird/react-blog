@@ -1,15 +1,20 @@
 import comments from './comments';
 import collects from './collects';
+import usercenter from './usercenter';
 import {combineReducers} from 'redux'
 const initialState = {
-    articleList: [],
-    articleDetail: {
+    articleList: {
+        pageNum:1,
+        total:0,
+        isFetching:true,
+        data:[]
+    },
+    articleDetail:{
         isFetching:true,
         data:{}
     },
-    pageNum: 1,
-    total: 0,
-    isFetching:true
+    currentTag:'首页',
+    menuVisible:false
 };
 
 export const actionTypes = {
@@ -17,7 +22,7 @@ export const actionTypes = {
     RESPONSE_ARTICLE_LIST: "RESPONSE_ARTICLE_LIST",
     GET_ARTICLE_DETAIL: "GET_ARTICLE_DETAIL",
     RESPONSE_ARTICLE_DETAIL: "RESPONSE_ARTICLE_DETAIL",
-    RELOAD_ARTICLE_DETAIL:'RELOAD_ARTICLE_DETAIL'
+    TOGGLE_MENU_VISIBLE:'TOGGLE_MENU_VISIBLE'
 };
 
 export const actions = {
@@ -34,24 +39,37 @@ export const actions = {
             id
         }
     },
-    reload_article_detail:function(id){
-        return { type:actionTypes.RELOAD_ARTICLE_DETAIL, id}
+    toggle_menu_visible:function(boolean){
+        return {
+            type:actionTypes.TOGGLE_MENU_VISIBLE,
+            visible:boolean
+        }
     }
 };
 
  function reducer(state = initialState, action) {
     switch (action.type) {
-        case actionTypes.RESPONSE_ARTICLE_LIST:
+        case actionTypes.GET_ARTICLE_LIST:
             return {
-                ...state, articleList: [...action.data.list], pageNum: action.data.pageNum, total: action.data.total, isFetching:false
+                ...state,articleList:{...state.articleList, isFetching:true}
+            }
+        case actionTypes.RESPONSE_ARTICLE_LIST:
+            var { list, pageNum, total, currentTag } = action.data;
+            return {
+                ...state, articleList:{ pageNum, total, isFetching:false, data:list }, currentTag:currentTag ? currentTag :'首页', menuVisible:false
             };
+        case actionTypes.GET_ARTICLE_DETAIL:
+            return {
+                ...state, articleDetail:{...state.articleDetail, isFetching:true}
+            }
         case actionTypes.RESPONSE_ARTICLE_DETAIL:
             return {
-                ...state, articleDetail: { data:action.data, isFetching:false}
+                ...state, articleDetail:{ data:action.data, isFetching:false }
             };
-        case actionTypes.RELOAD_ARTICLE_DETAIL:
+        case actionTypes.TOGGLE_MENU_VISIBLE:
             return {
-                ...state,articleDetail:{...state.articleDetail, isFetching:true}
+                ...state,
+                menuVisible:action.visible
             }
         default:
             return state;
@@ -61,5 +79,6 @@ export const actions = {
 export default combineReducers({
     article:reducer,
     comments,
-    collects
+    collects,
+    usercenter
 })

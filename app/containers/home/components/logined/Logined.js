@@ -1,15 +1,15 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import style from './style.css'
 import {Button} from 'antd'
 
 export const Logined = (props) => (
     <div className={style.container}>
-
-        <img src={require('./timg.jpeg')}/>
-        <p>用户：{props.userInfo.username}</p>
-        
-        {props.userInfo.userType === 'admin' ?
-            <Button onClick={() => props.history.push('/admin')} type="primary">管理页面</Button> : null}
-            <Button onClick={()=>props.loginOut()}style={{marginTop:'4px'}}>退出登录</Button>
+        <div className={style['img-container']}><img src={props.userInfo.userImage}/></div>
+        <div>用户：{props.userInfo.username}</div>  
+        <div>
+        <Button type="primary" size="small"><Link to={`/usercenter/${props.userInfo.userId}`}>个人中心</Link></Button>
+        <Button size="small" onClick={()=>props.loginOut()}>退出登录</Button>
+        </div>       
     </div>
 );

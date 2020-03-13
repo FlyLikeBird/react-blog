@@ -55,7 +55,7 @@ function getComments(res, uniquekey, pageNum=1, sort='time'){
             Comment.find(filter)
                 .populate({
                     path:'fromUser',
-                    select:'username userImage'
+                    select:'username userImage level description'
                 })
                 .populate({
                     path:'likeUsers.user',
@@ -70,7 +70,7 @@ function getComments(res, uniquekey, pageNum=1, sort='time'){
                     populate : [
                         { path:'likeUsers.user', select:'username userImage'},
                         { path:'dislikeUsers.user', select:'username userImage'},
-                        { path: 'fromUser', select:'username userImage'},
+                        { path: 'fromUser', select:'username userImage level description'},
                         { 
                             path:'replyTo',
                             select:'fromUser',

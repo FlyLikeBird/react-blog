@@ -2,10 +2,10 @@ import React,{ PureComponent} from 'react'
 import { Button, Icon, Popover } from 'antd';
 import style from './comment-item.style.css';
 import { parseDate, formatDate } from '../../../../util';
-import UserList from '../user-list';
 import CommentInput from '../comment-input'
 import CommentButton from './CommentButton'
 import SubComment from './SubComment'
+import Avatar from '../../../../components/Avatar/Avatar'
 
 export default class CommentItem extends PureComponent{
     shouldComponentUpdate(nextProps){
@@ -22,7 +22,7 @@ export default class CommentItem extends PureComponent{
 
         return(
             <div className={style.container}>
-                <div className={style['avatar-container']}><img src={fromUser && fromUser.userImage} /></div>
+                <div className={style['avatar-container']}><Avatar data={fromUser}/></div>
                 <div className={style['content-container']}>
                     <div className={style.title}>{fromUser && fromUser.username}</div>
                     <div className={style.text}>{formatDate(parseDate(date))}</div>
